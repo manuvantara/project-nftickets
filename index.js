@@ -1,22 +1,17 @@
-import { getRandomValues as expoCryptoGetRandomValues } from 'expo-crypto';
+/**
+ * @format
+ */
+
+import { AppRegistry } from 'react-native';
+
+import 'react-native-url-polyfill/auto';
+import 'react-native-get-random-values';
 import { Buffer } from 'buffer';
+import { TextDecoder } from 'fastestsmallesttextencoderdecoder';
 global.Buffer = Buffer;
+global.TextDecoder = TextDecoder;
 
-// getRandomValues polyfill
-class Crypto {
-  getRandomValues = expoCryptoGetRandomValues;
-}
+import App from './App';
+import { name as appName } from './app.json';
 
-const webCrypto = typeof crypto !== 'undefined' ? crypto : new Crypto();
-
-(() => {
-  if (typeof crypto === 'undefined') {
-    Object.defineProperty(window, 'crypto', {
-      configurable: true,
-      enumerable: true,
-      get: () => webCrypto,
-    });
-  }
-})();
-
-import 'expo-router/entry';
+AppRegistry.registerComponent(appName, () => App);
