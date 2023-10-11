@@ -5,10 +5,10 @@
  * @format
  */
 
-import React from 'react';
-import { Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React from 'react';
+import { Text, View } from 'react-native';
 
 import {
   addConfigLines,
@@ -38,6 +38,7 @@ import {
 } from '@metaplex-foundation/umi';
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
 
+import AddCircle from './src/images/AddCircle.svg';
 import { env } from './src/utils/env';
 import { CandyMachineParams, NftMetadata } from './src/utils/types';
 
@@ -233,6 +234,7 @@ function HomeScreen() {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <Text>Home Screen</Text>
+      <AddCircle width={120} height={120} />
     </View>
   );
 }
