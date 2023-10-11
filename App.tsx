@@ -233,7 +233,7 @@ async function mintNft(
 function HomeScreen() {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Home Screen</Text>
+      <Text style={{ fontFamily: 'Montserrat-SemiBold' }}>Home Screen</Text>
       <AddCircle width={120} height={120} />
     </View>
   );
