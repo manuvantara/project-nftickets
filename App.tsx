@@ -15,9 +15,6 @@ import {
   Header,
   LearnMoreLinks,
 } from 'react-native/Libraries/NewAppScreen';
-import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
-
-import { mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata';
 import {
   createSignerFromKeypair,
   keypairIdentity,
@@ -31,22 +28,18 @@ import {
 } from './src/utils/placeholders';
 import { AUTHORITY_PRIVATE_KEY } from '@env';
 import {
-  fetchNfts,
-  getNftMetadataByUri,
-  getTicketEventPairsByOwner,
-  getTicketsByEvent,
-} from './src/utils/nft-tools/nft-retrieval';
+  fetchCandyMachineItems,
+  fetchTicketEventPairsByOwner,
+  fetchTicketsByEvent,
+} from './src/utils/metaplex/nft-retrieval';
 import {
   insertNfts,
   createCandyMachine,
   mintNft,
-} from './src/utils/nft-tools/core';
-import { mplCandyMachine } from '@metaplex-foundation/mpl-candy-machine';
+} from './src/utils/metaplex/core';
+import { initializeUmi } from './src/utils/metaplex/core';
 
-// initialize umi
-const umi = createUmi('https://api.devnet.solana.com')
-  .use(mplTokenMetadata())
-  .use(mplCandyMachine());
+const umi = initializeUmi();
 
 // use authority wallet to sign transactions
 const authorityKeypair = umi.eddsa.createKeypairFromSecretKey(
@@ -124,7 +117,7 @@ function App(): JSX.Element {
               accessibilityLabel="Learn more about this purple button"
             />
             <Button
-              onPress={() => fetchNfts(umi, SOME_CANDY_MACHINE)}
+              onPress={() => fetchCandyMachineItems(umi, SOME_CANDY_MACHINE)}
               title="Fetch tickets"
               color="#841584"
               accessibilityLabel="Learn more about this purple button"
@@ -145,14 +138,14 @@ function App(): JSX.Element {
           </Section>
           <Section title="Fetch Functions">
             <Button
-              onPress={() => getTicketsByEvent(umi, SOME_NFT_COLLECTION)}
+              onPress={() => fetchTicketsByEvent(umi, SOME_NFT_COLLECTION)}
               title="Get Tickets By Event"
               color="#007515"
               accessibilityLabel="Learn more about this green button"
             />
             <Button
               onPress={() =>
-                getTicketEventPairsByOwner(
+                fetchTicketEventPairsByOwner(
                   umi,
                   publicKey('FSLGMiNAfKAszf6M3zyEVZaZx3mA5ZeQJYBkeAzfKEVm'),
                 )

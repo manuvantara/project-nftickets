@@ -7,7 +7,7 @@ import { TicketEventPairs, TicketMetadata } from '../types';
 import { PublicKey, Umi, publicKey } from '@metaplex-foundation/umi';
 import { fetchNftMetadata } from './metadata';
 
-export async function fetchNfts(
+export async function fetchCandyMachineItems(
   umi: Umi,
   candyMachinePublicKey: PublicKey,
 ): Promise<CandyMachineItem[] | undefined> {
@@ -24,7 +24,7 @@ export async function fetchNfts(
 }
 
 // Fetches NFTs from uri array in parallel
-export async function getNftMetadataByUri(
+export async function fetchNftsMetadata(
   uris: string[],
 ): Promise<TicketMetadata[] | undefined> {
   try {
@@ -46,7 +46,7 @@ export async function getNftMetadataByUri(
   }
 }
 
-export async function getTicketsByEvent(
+export async function fetchTicketsByEvent(
   umi: Umi,
   eventPublicKey: PublicKey,
 ): Promise<String[] | undefined> {
@@ -73,7 +73,7 @@ export async function getTicketsByEvent(
   }
 }
 
-export async function getTicketEventPairsByOwner(
+export async function fetchTicketEventPairsByOwner(
   umi: Umi,
   ownerPublicKey: PublicKey,
 ): Promise<TicketEventPairs | undefined> {
