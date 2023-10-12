@@ -14,7 +14,6 @@ const config = {
     assetExts: assetExts.filter(ext => ext !== 'svg'),
     sourceExts: [...sourceExts, 'svg'],
     unstable_enablePackageExports: true,
-    resolverMainFields: ['react-native', 'browser', 'main'],
   },
   transformer: {
     babelTransformerPath: require.resolve('react-native-svg-transformer'),
