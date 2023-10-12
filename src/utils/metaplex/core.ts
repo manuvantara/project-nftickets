@@ -1,6 +1,7 @@
 import {
   TokenStandard,
   createNft,
+  mplTokenMetadata,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
   PublicKey,
@@ -13,17 +14,25 @@ import {
   some,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
-import {CandyMachineParams, NftMetadata} from '../types';
-import {waitForTransaction} from '../helpers/wait-for-transaction';
+import { CandyMachineParams, NftMetadata } from '../types';
+import { waitForTransaction } from '../helpers/wait-for-transaction';
 import {
   ConfigLine,
   addConfigLines,
   create,
   fetchCandyMachine,
   mintV2,
+  mplCandyMachine,
 } from '@metaplex-foundation/mpl-candy-machine';
-import {PREFIX_URI, updateEventMetadata} from './metadata';
-import {setComputeUnitLimit} from '@metaplex-foundation/mpl-toolbox';
+import { PREFIX_URI, updateEventMetadata } from './metadata';
+import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
+import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
+
+export function initializeUmi() {
+  return createUmi('https://api.devnet.solana.com')
+    .use(mplTokenMetadata())
+    .use(mplCandyMachine());
+}
 
 export async function createCandyMachine(
   umi: Umi,
@@ -41,7 +50,7 @@ export async function createCandyMachine(
     if (!collectionMintPublicKey) return;
 
     const candyMachine = generateSigner(umi);
-    const {signature} = await (
+    const { signature } = await (
       await create(umi, {
         candyMachine,
         collectionMint: publicKey(collectionMintPublicKey),
@@ -68,7 +77,7 @@ export async function createCandyMachine(
             lamports: sol(candyMachineParams.pricePerToken),
             destination: candyMachineParams.treasury,
           }),
-          startDate: some({date: candyMachineParams.startDate}),
+          startDate: some({ date: candyMachineParams.startDate }),
         },
       })
     ).sendAndConfirm(umi);
@@ -101,7 +110,7 @@ export async function mintNftCollection(
     console.log('Minting NFT collection...');
 
     const collectionMint = generateSigner(umi);
-    const {signature} = await createNft(umi, {
+    const { signature } = await createNft(umi, {
       mint: collectionMint,
       authority: authority,
       name: nftMetadata.name,
@@ -131,7 +140,7 @@ export async function insertNfts(
 
     const candyMachine = await fetchCandyMachine(umi, candyMachinePublicKey);
 
-    const {signature} = await addConfigLines(umi, {
+    const { signature } = await addConfigLines(umi, {
       candyMachine: candyMachine.publicKey,
       index: candyMachine.itemsLoaded,
       configLines: nfts,
@@ -155,8 +164,8 @@ export async function mintNft(
     const candyMachine = await fetchCandyMachine(umi, candyMachinePublicKey);
 
     const nftMint = generateSigner(umi);
-    const {signature} = await transactionBuilder()
-      .add(setComputeUnitLimit(umi, {units: 800_000}))
+    const { signature } = await transactionBuilder()
+      .add(setComputeUnitLimit(umi, { units: 800_000 }))
       .add(
         mintV2(umi, {
           candyMachine: candyMachine.publicKey,
@@ -164,7 +173,7 @@ export async function mintNft(
           collectionMint: candyMachine.collectionMint,
           collectionUpdateAuthority: authorityPublicKey,
           mintArgs: {
-            solPayment: some({destination: treasury}),
+            solPayment: some({ destination: treasury }),
           },
         }),
       )
