@@ -1,13 +1,13 @@
 import { ConfigLine } from '@metaplex-foundation/mpl-candy-machine';
-import { CandyMachineParams, NftMetadata } from './types';
+import { CandyMachineParams, EventMetadata, TicketMetadata } from './types';
 import { dateTime, publicKey } from '@metaplex-foundation/umi';
 
 export const NFT: ConfigLine = {
   name: '',
-  uri: 'ipfs', // link to the uploaded metadata
+  uri: 'bafkreidgwakxiplpk2t4yf7b4zmn6pu7ygln3fmftmva7fcb6cm3plf6mq', // link to the uploaded metadata
 };
 
-export const NFT_METADATA: NftMetadata = {
+export const NFT_METADATA: TicketMetadata = {
   name: 'Atlass Weekend 2023 Ticket',
   description: '',
   image: 'should be first uploaded to ipfs/aws',
@@ -23,7 +23,7 @@ export const NFT_METADATA: NftMetadata = {
       value: 'VIP',
     },
     {
-      trait_type: 'visits_allowed',
+      trait_type: 'allowed_visits',
       value: '-1',
     },
     {
@@ -37,7 +37,7 @@ export const NFT_METADATA: NftMetadata = {
   },
 };
 
-export const COLLECTION_METADATA: NftMetadata = {
+export const COLLECTION_METADATA: EventMetadata = {
   name: 'Atlass Weekend 2023',
   description: '',
   image: 'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_1280.jpg', // nftCollectionImageUri
@@ -58,7 +58,7 @@ export const COLLECTION_METADATA: NftMetadata = {
       {
         uri: 'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_1280.jpg', // nftCollectionBannerUri
         type: 'image/jpg',
-        cdn: true,
+        cdn: false,
       },
     ],
     category: 'banner',
@@ -76,5 +76,13 @@ export const CANDY_MACHINE_PARAMS: CandyMachineParams = {
 };
 
 export const SOME_CANDY_MACHINE = publicKey(
-  'H29kuck8pWXqsTbmkQy7cuMNJ3kXhCdCska7dDwC1nq4',
+  '7uZpYgQ4gKvRaM9ShTNtrDJw9wPK47aqa4H17YJeLGUq',
+);
+
+export const SOME_NFT_COLLECTION = publicKey(
+  '4MJPpHsdZQCi77GP4d9RqX3bNhauGtZC1PnpZoRJuxj3',
+);
+
+export const SOME_NFT = publicKey(
+  'BWdspE5HaBCg4QKJ7Qw9xgf255UKz6ZRimsQcTXQn1nK',
 );

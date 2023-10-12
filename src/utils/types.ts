@@ -1,4 +1,4 @@
-import { PublicKey } from '@metaplex-foundation/umi';
+import {PublicKey} from '@metaplex-foundation/umi';
 
 export type CandyMachineParams = {
   itemsAvailable: number;
@@ -7,7 +7,7 @@ export type CandyMachineParams = {
   pricePerToken: number;
   treasury: PublicKey;
 
-  metadata: NftMetadata;
+  metadata: EventMetadata;
 };
 
 export type NftMetadata = {
@@ -29,3 +29,54 @@ export type NftMetadata = {
     category: string;
   };
 };
+
+export type EventMetadata = NftMetadata & {
+  attributes: [
+    {
+      trait_type: 'start_time';
+      value: string;
+    },
+    {
+      trait_type: 'candy_machine';
+      value: string;
+    },
+  ];
+  properties: {
+    files: [
+      {
+        uri: string;
+        type: 'image/jpg';
+        cdn: false;
+      },
+    ];
+    category: 'banner';
+  };
+};
+
+export type TicketMetadata = NftMetadata & {
+  attributes: [
+    {
+      trait_type: 'expiry_time';
+      value: string;
+    },
+    {
+      trait_type: 'ticket_type';
+      value: string;
+    },
+    {
+      trait_type: 'allowed_visits';
+      value: string;
+    },
+    {
+      trait_type: 'visits';
+      value: string;
+    },
+  ];
+};
+
+export type TicketEventPair = {
+  ticketPublicKey: string;
+  eventPublicKey: string;
+};
+
+export type TicketEventPairs = TicketEventPair[];
