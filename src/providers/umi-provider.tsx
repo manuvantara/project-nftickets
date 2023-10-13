@@ -9,10 +9,7 @@ import { mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata';
 import { mplCandyMachine } from '@metaplex-foundation/mpl-candy-machine';
 import { AUTHORITY_PRIVATE_KEY } from '@env';
 
-interface UmiProviderContextType {
-  umi: Umi;
-}
-export const UmiContext = createContext<UmiProviderContextType | null>(null);
+export const UmiContext = createContext<Umi | null>(null);
 
 export default function UmiProvider({ children }: { children: JSX.Element }) {
   const umi = createUmi('https://api.devnet.solana.com')
@@ -25,5 +22,5 @@ export default function UmiProvider({ children }: { children: JSX.Element }) {
   const authority = createSignerFromKeypair(umi, authorityKeypair);
   umi.use(keypairIdentity(authority));
 
-  return <UmiContext.Provider value={{ umi }}>{children}</UmiContext.Provider>;
+  return <UmiContext.Provider value={umi}>{children}</UmiContext.Provider>;
 }
