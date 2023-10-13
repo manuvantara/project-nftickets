@@ -36,7 +36,6 @@ export function initializeUmi() {
 
 export async function createCandyMachine(
   umi: Umi,
-  authority: Signer,
   candyMachineParams: CandyMachineParams,
 ): Promise<PublicKey | undefined> {
   try {
@@ -44,7 +43,6 @@ export async function createCandyMachine(
 
     const collectionMintPublicKey = await mintNftCollection(
       umi,
-      authority,
       candyMachineParams.metadata,
     );
     if (!collectionMintPublicKey) return;
@@ -54,13 +52,13 @@ export async function createCandyMachine(
       await create(umi, {
         candyMachine,
         collectionMint: publicKey(collectionMintPublicKey),
-        collectionUpdateAuthority: authority,
+        collectionUpdateAuthority: umi.payer,
         tokenStandard: TokenStandard.NonFungible,
         sellerFeeBasisPoints: percentAmount(0),
         itemsAvailable: candyMachineParams.itemsAvailable,
         creators: [
           {
-            address: authority.publicKey,
+            address: umi.payer.publicKey,
             verified: true,
             percentageShare: 100,
           },
@@ -89,7 +87,6 @@ export async function createCandyMachine(
 
     await updateEventMetadata(
       umi,
-      authority,
       collectionMintPublicKey,
       candyMachine.publicKey,
       candyMachineParams,
@@ -103,7 +100,6 @@ export async function createCandyMachine(
 
 export async function mintNftCollection(
   umi: Umi,
-  authority: Signer,
   nftMetadata: NftMetadata,
 ): Promise<PublicKey | undefined> {
   try {
@@ -112,7 +108,7 @@ export async function mintNftCollection(
     const collectionMint = generateSigner(umi);
     const { signature } = await createNft(umi, {
       mint: collectionMint,
-      authority: authority,
+      authority: umi.payer,
       name: nftMetadata.name,
       uri: '',
       sellerFeeBasisPoints: percentAmount(0),
@@ -155,7 +151,6 @@ export async function insertNfts(
 
 export async function mintNft(
   umi: Umi,
-  authorityPublicKey: PublicKey,
   candyMachinePublicKey: PublicKey,
   treasury: PublicKey,
 ): Promise<PublicKey | undefined> {
@@ -171,7 +166,7 @@ export async function mintNft(
           candyMachine: candyMachine.publicKey,
           nftMint: nftMint,
           collectionMint: candyMachine.collectionMint,
-          collectionUpdateAuthority: authorityPublicKey,
+          collectionUpdateAuthority: umi.payer.publicKey,
           mintArgs: {
             solPayment: some({ destination: treasury }),
           },

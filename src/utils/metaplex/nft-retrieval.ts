@@ -75,12 +75,11 @@ export async function fetchTicketsByEvent(
 
 export async function fetchTicketEventPairsByOwner(
   umi: Umi,
-  ownerPublicKey: PublicKey,
 ): Promise<TicketEventPairs | undefined> {
   try {
     console.log('Fetching ticket-event pairs...');
 
-    const assets = await fetchAllDigitalAssetByOwner(umi, ownerPublicKey);
+    const assets = await fetchAllDigitalAssetByOwner(umi, umi.payer.publicKey);
     const tickets = assets.filter(
       asset => asset.metadata.collection.__option === 'Some',
     );
