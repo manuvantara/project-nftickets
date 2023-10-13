@@ -3,7 +3,7 @@ import {
   fetchCandyMachine,
 } from '@metaplex-foundation/mpl-candy-machine';
 import { fetchAllDigitalAssetByOwner } from '@metaplex-foundation/mpl-token-metadata';
-import { TicketEventPairs, TicketMetadata } from '../types';
+import { EventMetadata, TicketEventPairs, TicketMetadata } from '../types';
 import { PublicKey, Umi, publicKey } from '@metaplex-foundation/umi';
 import { fetchNftMetadata } from './metadata';
 
@@ -26,21 +26,22 @@ export async function fetchCandyMachineItems(
 // Fetches NFTs from uri array in parallel
 export async function fetchNftsMetadata(
   uris: string[],
-): Promise<TicketMetadata[] | undefined> {
+): Promise<EventMetadata[] | TicketMetadata[] | undefined> {
   try {
     console.log('Fetching nft(s) metadata...');
 
     const fetchPromises: Promise<any>[] = [];
 
     for (const uri of uris) {
-      const metadataPromise = (await fetch(uri)).json();
+      const metadataPromise = fetch(uri);
       fetchPromises.push(metadataPromise);
     }
 
-    const results: TicketMetadata[] = await Promise.all(fetchPromises);
-    console.log(results);
+    const results = await Promise.all(fetchPromises);
+    const jsons = await Promise.all(results.map(r => r.json()));
+    console.log(jsons);
 
-    return results;
+    return jsons;
   } catch (error) {
     console.error('Error fetching NFT metadata:', error);
   }
