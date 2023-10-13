@@ -101,6 +101,27 @@ export async function fetchTicketEventPairsByOwner(
     console.log(ticketEventPairs);
     return ticketEventPairs;
   } catch (error) {
-    console.error('Error getting ticket-event pairs', error);
+    console.error('Error fetching ticket-event pairs', error);
+  }
+}
+
+export async function fetchMyEvents(
+  umi: Umi,
+): Promise<PublicKey[] | undefined> {
+  try {
+    console.log('Fetching my events...');
+
+    const assets = await fetchAllDigitalAssetByOwner(umi, umi.payer.publicKey);
+    const eventAssets = assets.filter(
+      asset => asset.metadata.collection.__option === 'None',
+    );
+
+    const events: PublicKey[] = eventAssets.map(
+      eventAsset => eventAsset.publicKey,
+    );
+    console.log(events);
+    return events;
+  } catch (error) {
+    console.error('Error fetching my events', error);
   }
 }
