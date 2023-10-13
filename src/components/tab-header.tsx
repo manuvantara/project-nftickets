@@ -3,9 +3,9 @@ import React from 'react';
 import { Pressable, StyleSheet, View, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Shadow } from 'react-native-shadow-2';
+import { ROUTES } from '../constants/routes';
 import ScannerIcon from '../images/Scanner.svg';
 import AddCircleIcon from '../images/AddCircle.svg';
-import { ROUTES } from '../constants/routes';
 
 export default function TabHeader(props: BottomTabHeaderProps) {
   const insets = useSafeAreaInsets();
