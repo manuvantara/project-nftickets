@@ -2,10 +2,13 @@ import {
   CandyMachineItem,
   fetchCandyMachine,
 } from '@metaplex-foundation/mpl-candy-machine';
-import { fetchAllDigitalAssetByOwner } from '@metaplex-foundation/mpl-token-metadata';
-import { TicketEventPairs, TicketMetadata } from '../types';
+import {
+  DigitalAsset,
+  fetchAllDigitalAssetByOwner,
+} from '@metaplex-foundation/mpl-token-metadata';
+import { EventMetadata, TicketEventPairs, TicketMetadata } from '../types';
 import { PublicKey, Umi, publicKey } from '@metaplex-foundation/umi';
-import { fetchNftMetadata } from './metadata';
+import { GATEWAY_HOST, fetchNftMetadata } from './metadata';
 
 export async function fetchCandyMachineItems(
   umi: Umi,
@@ -26,21 +29,24 @@ export async function fetchCandyMachineItems(
 // Fetches NFTs from uri array in parallel
 export async function fetchNftsMetadata(
   uris: string[],
-): Promise<TicketMetadata[] | undefined> {
+): Promise<EventMetadata[] | TicketMetadata[] | undefined> {
   try {
     console.log('Fetching nft(s) metadata...');
 
     const fetchPromises: Promise<any>[] = [];
 
     for (const uri of uris) {
-      const metadataPromise = (await fetch(uri)).json();
+      const cid = uri.split('/').pop();
+      if (cid?.length !== 59) continue;
+      const metadataPromise = fetch(`${GATEWAY_HOST}${cid}`);
       fetchPromises.push(metadataPromise);
     }
 
-    const results: TicketMetadata[] = await Promise.all(fetchPromises);
-    console.log(results);
+    const results = await Promise.all(fetchPromises);
+    const jsons = await Promise.all(results.map(r => r.json()));
+    console.log(jsons);
 
-    return results;
+    return jsons;
   } catch (error) {
     console.error('Error fetching NFT metadata:', error);
   }
@@ -75,11 +81,12 @@ export async function fetchTicketsByEvent(
 
 export async function fetchTicketEventPairsByOwner(
   umi: Umi,
+  ownerPublicKey: PublicKey,
 ): Promise<TicketEventPairs | undefined> {
   try {
     console.log('Fetching ticket-event pairs...');
 
-    const assets = await fetchAllDigitalAssetByOwner(umi, umi.payer.publicKey);
+    const assets = await fetchAllDigitalAssetByOwner(umi, ownerPublicKey);
     const tickets = assets.filter(
       asset => asset.metadata.collection.__option === 'Some',
     );
@@ -107,7 +114,7 @@ export async function fetchTicketEventPairsByOwner(
 
 export async function fetchMyEvents(
   umi: Umi,
-): Promise<PublicKey[] | undefined> {
+): Promise<DigitalAsset[] | undefined> {
   try {
     console.log('Fetching my events...');
 
@@ -116,11 +123,7 @@ export async function fetchMyEvents(
       asset => asset.metadata.collection.__option === 'None',
     );
 
-    const events: PublicKey[] = eventAssets.map(
-      eventAsset => eventAsset.publicKey,
-    );
-    console.log(events);
-    return events;
+    return eventAssets;
   } catch (error) {
     console.error('Error fetching my events', error);
   }

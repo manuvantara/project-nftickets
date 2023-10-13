@@ -142,7 +142,7 @@ export async function updateTicketVisits(
       authority: umi.payer,
       data: { ...nftMetadataAccount, uri: `${PREFIX_URI}${cid}` },
     }).sendAndConfirm(umi);
-    waitForTransaction(umi, signature);
+    await waitForTransaction(umi, signature);
 
     console.log('Ticket`s metadata was successfully updated');
   } catch (error) {
@@ -176,7 +176,7 @@ export async function updateEventMetadata(
       authority: umi.payer,
       data: { ...collectionMetadataAccount, uri: `${PREFIX_URI}${cid}` },
     }).sendAndConfirm(umi);
-    waitForTransaction(umi, signature);
+    await waitForTransaction(umi, signature);
 
     console.log('Event`s metadata was successfully updated');
   } catch (error) {
