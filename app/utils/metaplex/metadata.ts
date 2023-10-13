@@ -117,7 +117,6 @@ export async function fetchNftMetadata(
 
 export async function updateTicketVisits(
   umi: Umi,
-  authority: Signer,
   nftMintPublicKey: PublicKey,
 ): Promise<void> {
   try {
@@ -140,7 +139,7 @@ export async function updateTicketVisits(
 
     const { signature } = await updateV1(umi, {
       mint: nftMintPublicKey,
-      authority: authority,
+      authority: umi.payer,
       data: { ...nftMetadataAccount, uri: `${PREFIX_URI}${cid}` },
     }).sendAndConfirm(umi);
     waitForTransaction(umi, signature);
@@ -153,7 +152,6 @@ export async function updateTicketVisits(
 
 export async function updateEventMetadata(
   umi: Umi,
-  authority: Signer,
   collectionMintPublicKey: PublicKey,
   candyMachinePublicKey: PublicKey,
   candyMachineParams: CandyMachineParams,
@@ -175,7 +173,7 @@ export async function updateEventMetadata(
 
     const { signature } = await updateV1(umi, {
       mint: collectionMintPublicKey,
-      authority: authority,
+      authority: umi.payer,
       data: { ...collectionMetadataAccount, uri: `${PREFIX_URI}${cid}` },
     }).sendAndConfirm(umi);
     waitForTransaction(umi, signature);
