@@ -1,13 +1,11 @@
 import React from 'react';
-import { Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React from 'react';
 
-import { ROUTES } from './src/constants/routes';
+import { ROUTES } from './app/constants/routes';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import TabNavigation from './src/components/tab-navigator';
+import TabNavigation from './app/components/tab-navigator';
 
 const Stack = createNativeStackNavigator();
 
