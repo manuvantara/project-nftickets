@@ -131,7 +131,7 @@ export async function insertNfts(
       index: candyMachine.itemsLoaded,
       configLines: nfts,
     }).sendAndConfirm(umi);
-    waitForTransaction(umi, signature);
+    await waitForTransaction(umi, signature);
 
     console.log(`Successfully inserted ${nfts.length} NFTs`);
   } catch (error) {
