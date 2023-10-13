@@ -1,19 +1,48 @@
-import React from 'react';
-import { StyleSheet, View, FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, FlatList, Button } from 'react-native';
 import CreateNewEvent from '../create-new-event';
-import EventCard from '../event';
-
-const MOCK_EVENT = {
-  cover: 'https://picsum.photos/200',
-  title: 'Atlass Weekend 2023',
-  date: '2023-04-23',
-};
+import EventCard, { EventCardProps } from '../event';
+import {
+  fetchMyEvents,
+  fetchNftsMetadata,
+} from '../../utils/metaplex/nft-retrieval';
+import useUmi from '../../hooks/use-umi';
+import { NftMetadata } from '../../utils/types';
 
 export default function MyEventsScreen() {
+  const [myEvents, setEvents] = useState<EventCardProps[]>();
+  const { umi } = useUmi();
+
+  useEffect(() => {
+    async function getMyEvents() {
+      try {
+        const myEventAssets = await fetchMyEvents(umi);
+        if (!myEventAssets) return;
+
+        const eventUris = myEventAssets.map(event => event.metadata.uri);
+        console.log(eventUris);
+        const eventMetadatas = await fetchNftsMetadata(eventUris);
+        if (!eventMetadatas) return;
+
+        const events = eventMetadatas.map((eventMetadata: NftMetadata) => ({
+          cover: eventMetadata.image,
+          title: eventMetadata.name,
+          date: eventMetadata.attributes[0].value,
+        }));
+
+        setEvents(events);
+      } catch (error) {
+        console.error('Error fetching my events:', error);
+      }
+    }
+
+    getMyEvents();
+  }, [umi]);
+
   return (
     <View style={s.container}>
       <FlatList
-        data={[MOCK_EVENT, MOCK_EVENT, MOCK_EVENT]}
+        data={myEvents}
         contentContainerStyle={s.listContainer}
         style={s.list}
         ItemSeparatorComponent={() => <View style={{ height: 24 }} />}

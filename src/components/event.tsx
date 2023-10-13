@@ -5,13 +5,13 @@ import { Shadow } from 'react-native-shadow-2';
 import { MontserratMedium } from './text';
 import { COLORS } from '../constants/theme';
 
-type Props = {
+export type EventCardProps = {
   cover: string;
   title: string;
   date: string;
 };
 
-export default function EventCard({ cover, date, title }: Props) {
+export default function EventCard({ cover, date, title }: EventCardProps) {
   return (
     <Shadow
       style={s.container}
