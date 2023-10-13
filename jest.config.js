@@ -9,4 +9,8 @@ module.exports = {
     "rn-fetch-blob": require.resolve('rn-fetch-blob'),
     "react-native-image-picker": require.resolve('react-native-image-picker'),
   },
+  transform: {
+    '^.+\\.(ts|tsx)?$': 'ts-jest',
+    '^.+\\.(js|jsx)$': 'babel-jest',
+  }
 };
