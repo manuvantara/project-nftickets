@@ -1,11 +1,9 @@
 import {
   TokenStandard,
   createNft,
-  mplTokenMetadata,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
   PublicKey,
-  Signer,
   Umi,
   generateSigner,
   percentAmount,
@@ -22,17 +20,9 @@ import {
   create,
   fetchCandyMachine,
   mintV2,
-  mplCandyMachine,
 } from '@metaplex-foundation/mpl-candy-machine';
 import { PREFIX_URI, updateEventMetadata } from './metadata';
 import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
-import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
-
-export function initializeUmi() {
-  return createUmi('https://api.devnet.solana.com')
-    .use(mplTokenMetadata())
-    .use(mplCandyMachine());
-}
 
 export async function createCandyMachine(
   umi: Umi,
