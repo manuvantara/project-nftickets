@@ -5,4 +5,5 @@ export const ROUTES = {
     MY_EVENTS: 'My Events',
     MY_TICKETS: 'My Tickets',
   },
+  TICKET: 'Ticket',
 } as const;

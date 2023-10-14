@@ -1,6 +1,8 @@
 import React from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import EventCard from '../event';
+import { RootTabScreenProps } from '../../types/navigation';
+import { ROUTES } from '../../constants/routes';
 
 const MOCK_EVENT = {
   cover: 'https://picsum.photos/200',
@@ -11,7 +13,9 @@ const MOCK_EVENT = {
 const numColumns = 2;
 const gap = 16;
 
-export default function AvailableEventsScreen() {
+export default function AvailableEventsScreen({
+  navigation,
+}: RootTabScreenProps<'Available Events'>) {
   return (
     <View style={s.container}>
       <FlatList
@@ -25,7 +29,9 @@ export default function AvailableEventsScreen() {
           <View style={index % 2 === 0 ? { paddingRight: gap } : {}}>
             <EventCard
               size="small"
-              onPress={() => console.log('pressed')}
+              onPress={() =>
+                navigation.navigate(ROUTES.TICKET, { ticketId: item.title })
+              }
               {...item}
             />
           </View>
