@@ -10,8 +10,9 @@ import {
 import TagIcon from '../images/Tag.svg';
 import TicketIcon from '../images/Ticket.svg';
 import ClipboardIcon from '../images/ClipboardAdd.svg';
+import { RootTabParamList } from '../types/navigation';
 
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<RootTabParamList>();
 
 export default function TabNavigation() {
   return (

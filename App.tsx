@@ -6,8 +6,10 @@ import { ROUTES } from './app/constants/routes';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import TabNavigation from './app/components/tab-navigator';
+import { RootStackParamList } from './app/types/navigation';
+import { TicketScreen } from './app/components/screens';
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App(): JSX.Element {
   return (
@@ -15,6 +17,7 @@ export default function App(): JSX.Element {
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name={ROUTES.TAB.INDEX} component={TabNavigation} />
+          <Stack.Screen name={ROUTES.TICKET} component={TicketScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
