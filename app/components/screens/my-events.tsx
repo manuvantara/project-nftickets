@@ -9,13 +9,6 @@ import {
   fetchMetadatasByUris,
 } from '../../utils/metaplex/nft-retrieval';
 import { NftMetadata } from '../../utils/types';
-import {
-  createCandyMachine,
-  insertNfts,
-  mintNft,
-} from '../../utils/metaplex/core';
-import { CANDY_MACHINE_PARAMS, NFT } from '../../utils/placeholders';
-import { publicKey } from '@metaplex-foundation/umi';
 
 export default function MyEventsScreen() {
   const [myEvents, setMyEvents] = useState<Event[]>();
@@ -24,15 +17,6 @@ export default function MyEventsScreen() {
   useEffect(() => {
     async function getMyEvents() {
       try {
-        const newMachine = await createCandyMachine(umi, CANDY_MACHINE_PARAMS);
-        if (!newMachine) return;
-        // const newMachine = publicKey(
-        //   'EgHmUK5z2FrA6gy1QeA8RoS2N97ZhFrSsQHZ9qAfDrAh',
-        // );
-
-        await insertNfts(umi, newMachine, [NFT, NFT, NFT, NFT, NFT]);
-        await mintNft(umi, newMachine, umi.payer.publicKey);
-
         const eventAssets = await fetchEventsByOwner(umi);
         if (!eventAssets) return;
 

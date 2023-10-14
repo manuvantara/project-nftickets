@@ -43,6 +43,7 @@ export default function TicketScreen({
     image: string;
     expiryDate: string;
     type: string;
+    expired: boolean;
   }>();
 
   const [purchaseDetails, setPurchaseDetails] = useState<{
@@ -57,6 +58,12 @@ export default function TicketScreen({
         const ticket = await fetchMetadataByMint(umi, event.ticket.publicKey);
         if (!ticket) return;
 
+        const expired =
+          Number(ticket.attributes?.[0]?.value) * 1000 < Date.now() ||
+          (ticket.attributes?.[2]?.value !== '-1' &&
+            Number(ticket.attributes?.[3]?.value) >
+              Number(ticket.attributes?.[2]?.value));
+
         setTicket({
           id: ticket.name,
           expiryDate: timestampToDate(
@@ -64,6 +71,7 @@ export default function TicketScreen({
           ),
           type: ticket.attributes?.[1]?.value ?? '',
           image: ticket.image,
+          expired: expired,
         });
 
         const candyMachine = await fetchCandyMachineByEvent(
@@ -100,7 +108,11 @@ export default function TicketScreen({
       style={[s.cardBackground]}>
       <FastImage
         style={[StyleSheet.absoluteFill, s.cardBackground]}
-        source={require('../../images/CardBackground.png')}>
+        source={
+          ticket?.expired
+            ? require('../../images/ExpiredTicketBackground.png')
+            : require('../../images/CardBackground.png')
+        }>
         <View style={s.cardHeader}>
           <View style={s.cardHeaderBlock}>
             <MontserratMedium style={s.cardHeaderText}>
