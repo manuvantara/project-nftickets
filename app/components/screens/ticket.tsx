@@ -22,11 +22,10 @@ const TOP_CARD_DATA = {
 
 export default function TicketScreen({
   route,
+  navigation,
 }: RootStackScreenProps<'Ticket'>) {
   const insets = useSafeAreaInsets();
   const [cardSide, setCardSide] = useState<FlipSide>(FlipSide.BACK);
-
-  console.log('cardSide', cardSide);
 
   const FrontSide = (
     <LinearGradient
@@ -88,9 +87,11 @@ export default function TicketScreen({
   return (
     <ScrollView style={s.container}>
       <View style={[s.header, , { paddingTop: insets.top + 8 }]}>
-        <Shadow distance={4} style={s.backButton}>
-          <ArrowLeft width={24} height={24} />
-        </Shadow>
+        <Pressable onPress={() => navigation.goBack()}>
+          <Shadow distance={4} style={s.backButton}>
+            <ArrowLeft width={24} height={24} />
+          </Shadow>
+        </Pressable>
       </View>
       <View style={s.content}>
         <Shadow distance={4} style={s.topCard}>
