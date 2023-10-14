@@ -1,20 +1,14 @@
 import { launchImageLibrary } from 'react-native-image-picker';
 import RNFetchBlob from 'rn-fetch-blob';
-
 import {
-  fetchDigitalAsset,
   fetchMetadataFromSeeds,
   updateV1,
 } from '@metaplex-foundation/mpl-token-metadata';
-import { NFT_STORAGE_API_KEY } from '@env';
-import {
-  CandyMachineParams,
-  EventMetadata,
-  NftMetadata,
-  TicketMetadata,
-} from '../types';
-import { PublicKey, Signer, Umi } from '@metaplex-foundation/umi';
+import Config from 'react-native-config';
+import { CandyMachineParams, NftMetadata } from '../types';
+import { PublicKey, Umi } from '@metaplex-foundation/umi';
 import { waitForTransaction } from '../helpers/wait-for-transaction';
+import { fetchMetadataByMint } from './nft-retrieval';
 
 export const PREFIX_URI = 'ipfs://';
 export const GATEWAY_HOST = 'https://nftstorage.link/ipfs/';
@@ -66,7 +60,7 @@ export async function uploadToIpfs(
       method: 'POST',
       headers: {
         Accept: 'application/json',
-        Authorization: `Bearer ${NFT_STORAGE_API_KEY}`,
+        Authorization: `Bearer ${Config.NFT_STORAGE_API_KEY}`,
         'Content-Type': contentType,
       },
       body: data,
@@ -98,23 +92,6 @@ export async function uploadMetadata(
   }
 }
 
-export async function fetchNftMetadata(
-  umi: Umi,
-  mintPublicKey: PublicKey,
-): Promise<EventMetadata | TicketMetadata | undefined> {
-  try {
-    const uri = (await fetchDigitalAsset(umi, mintPublicKey)).metadata.uri;
-    const cid = uri.split('/').pop(); // Extract the last part of the uri i.e. cid
-
-    const response = await fetch(`${GATEWAY_HOST}${cid}`);
-    const metadata = await response.json();
-
-    return metadata;
-  } catch (error) {
-    console.error('Error fetching metadata:', error);
-  }
-}
-
 export async function updateTicketVisits(
   umi: Umi,
   nftMintPublicKey: PublicKey,
@@ -122,7 +99,7 @@ export async function updateTicketVisits(
   try {
     console.log('Updating ticket`s metadata...');
 
-    const initialMetadata = await fetchNftMetadata(umi, nftMintPublicKey);
+    const initialMetadata = await fetchMetadataByMint(umi, nftMintPublicKey);
     if (!initialMetadata) return;
 
     const updatedMetadata = initialMetadata;
@@ -142,7 +119,7 @@ export async function updateTicketVisits(
       authority: umi.payer,
       data: { ...nftMetadataAccount, uri: `${PREFIX_URI}${cid}` },
     }).sendAndConfirm(umi);
-    waitForTransaction(umi, signature);
+    await waitForTransaction(umi, signature);
 
     console.log('Ticket`s metadata was successfully updated');
   } catch (error) {
@@ -176,7 +153,7 @@ export async function updateEventMetadata(
       authority: umi.payer,
       data: { ...collectionMetadataAccount, uri: `${PREFIX_URI}${cid}` },
     }).sendAndConfirm(umi);
-    waitForTransaction(umi, signature);
+    await waitForTransaction(umi, signature);
 
     console.log('Event`s metadata was successfully updated');
   } catch (error) {
