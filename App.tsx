@@ -6,18 +6,21 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import TabNavigation from './app/components/tab-navigator';
 import { RootStackParamList } from './app/types/navigation';
 import { TicketScreen } from './app/components/screens';
+import UmiProvider from './app/providers/umi-provider';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App(): JSX.Element {
   return (
-    <SafeAreaProvider>
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name={ROUTES.TAB.INDEX} component={TabNavigation} />
-          <Stack.Screen name={ROUTES.TICKET} component={TicketScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </SafeAreaProvider>
+    <UmiProvider>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name={ROUTES.TAB.INDEX} component={TabNavigation} />
+            <Stack.Screen name={ROUTES.TICKET} component={TicketScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </UmiProvider>
   );
 }
