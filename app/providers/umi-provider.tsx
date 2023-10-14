@@ -2,6 +2,7 @@ import React, { createContext, useEffect, useState } from 'react';
 import {
   Umi,
   createSignerFromKeypair,
+  generateSigner,
   keypairIdentity,
 } from '@metaplex-foundation/umi';
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
@@ -23,6 +24,9 @@ export default function UmiProvider({ children }: { children: JSX.Element }) {
   );
   const authority = createSignerFromKeypair(umi, authorityKeypair);
   umi.use(keypairIdentity(authority));
+
+  // const authority = generateSigner(umi);
+  // console.log(authority.secretKey, authority.publicKey);
 
   return <UmiContext.Provider value={umi}>{children}</UmiContext.Provider>;
 }

@@ -13,15 +13,27 @@ import Button from '../button';
 import FlipCard, { FlipSide } from '../flip-card';
 import { MontserratMedium, MontserratSemiBold } from '../text';
 import useUmi from '../../hooks/use-umi';
-import { fetchMetadataByMint } from '../../utils/metaplex/nft-retrieval';
+import {
+  fetchCandyMachineByEvent,
+  fetchMetadataByMint,
+} from '../../utils/metaplex/nft-retrieval';
 import { timestampToDate } from '../../utils/helpers/timestamp-to-date';
 import { ExternalLink } from '../external-link';
+import { fetchCandyGuard } from '@metaplex-foundation/mpl-candy-machine';
+
+import { uriToPath } from '../../utils/helpers/uri-to-path';
+import {
+  PublicKey,
+  displayAmount,
+  publicKey,
+  sol,
+} from '@metaplex-foundation/umi';
+import { mintNft } from '../../utils/metaplex/core';
 
 export default function TicketScreen({
   route,
 }: RootStackScreenProps<'Ticket'>) {
   const event = route.params;
-  console.log(event);
   const insets = useSafeAreaInsets();
   const [cardSide, setCardSide] = useState<FlipSide>(FlipSide.BACK);
 
@@ -33,6 +45,12 @@ export default function TicketScreen({
     type: string;
   }>();
 
+  const [purchaseDetails, setPurchaseDetails] = useState<{
+    destination: PublicKey;
+    price: string;
+    candyMachinePublicKey: PublicKey;
+  }>();
+
   useEffect(() => {
     async function getTicket() {
       try {
@@ -42,19 +60,37 @@ export default function TicketScreen({
         setTicket({
           id: ticket.name,
           expiryDate: timestampToDate(
-            Number(ticket.attributes?.[0]?.value) ?? 0,
+            Number(ticket.attributes?.[0]?.value) * 1000 ?? 0,
           ),
           type: ticket.attributes?.[1]?.value ?? '',
           image: ticket.image,
         });
+
+        const candyMachine = await fetchCandyMachineByEvent(
+          umi,
+          event.publicKey,
+        );
+        if (!candyMachine) return;
+        const candyGuard = await fetchCandyGuard(
+          umi,
+          candyMachine.mintAuthority,
+        );
+        if (!candyGuard) return;
+        if (candyGuard.guards.solPayment.__option !== 'Some') {
+          throw new Error('Could not fetch purchase details');
+        }
+        setPurchaseDetails({
+          destination: candyGuard.guards.solPayment.value.destination,
+          price: displayAmount(candyGuard.guards.solPayment.value.lamports, 3),
+          candyMachinePublicKey: candyMachine.publicKey,
+        });
       } catch (error) {
-        console.error('Error fetching my tickets:', error);
+        console.error('Error fetching ticket:', error);
       }
     }
+
     getTicket();
   }, []);
-
-  console.log('cardSide', cardSide);
 
   const FrontSide = (
     <LinearGradient
@@ -82,7 +118,10 @@ export default function TicketScreen({
           </View>
         </View>
         <View style={s.cardBody}>
-          <FastImage style={s.cardBodyImage} source={{ uri: ticket?.image }} />
+          <FastImage
+            style={s.cardBodyImage}
+            source={{ uri: uriToPath(ticket?.image ?? '') }}
+          />
           <MontserratSemiBold style={s.cardBodyTitle}>
             {event.title}
           </MontserratSemiBold>
@@ -100,8 +139,7 @@ export default function TicketScreen({
       style={s.cardBackground}>
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <MontserratMedium style={s.cardBodyWatermark}>
-          This is {event.title} Ticket {ticket?.id} purchased on NFTickets
-          platform
+          NFTicket
         </MontserratMedium>
         <View style={s.cardBodyQrCodeWrapper}>
           <QRCode size={160} value={event.link} />
@@ -119,7 +157,10 @@ export default function TicketScreen({
       </View>
       <View style={s.content}>
         <Shadow distance={4} style={s.topCard}>
-          <FastImage style={s.topCardImage} source={{ uri: event.image }} />
+          <FastImage
+            style={s.topCardImage}
+            source={{ uri: uriToPath(event.image) }}
+          />
           <View>
             <MontserratMedium style={s.topCardTitle}>
               {event.title}
@@ -148,12 +189,17 @@ export default function TicketScreen({
         <MontserratMedium style={s.hint}>Tap to rotate</MontserratMedium>
         <Button
           style={s.buyButton}
+          disabled={
+            !purchaseDetails?.candyMachinePublicKey || !purchaseDetails?.price
+          }
           onPress={() =>
-            setCardSide(prev =>
-              prev === FlipSide.BACK ? FlipSide.FRONT : FlipSide.BACK,
+            mintNft(
+              umi,
+              purchaseDetails!.candyMachinePublicKey,
+              purchaseDetails!.destination,
             )
           }>
-          Buy for 55.99 SOL
+          Buy for {purchaseDetails?.price ?? displayAmount(sol(0), 3)}
         </Button>
       </View>
     </ScrollView>
@@ -274,7 +320,7 @@ const s = StyleSheet.create({
     transform: [{ rotate: '-90deg' }],
     position: 'absolute',
     top: '50%',
-    right: '50%',
+    left: '0%',
   },
   cardBodyQrCodeWrapper: {
     alignItems: 'center',

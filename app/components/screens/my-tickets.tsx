@@ -47,8 +47,6 @@ export default function MyTicketsScreen({ navigation }) {
         );
         const filteredEvents = events.filter(event => event.title !== '');
 
-        console.log(filteredEvents);
-
         setEvents(filteredEvents);
       } catch (error) {
         console.error('Error fetching my tickets:', error);
@@ -72,6 +70,7 @@ export default function MyTicketsScreen({ navigation }) {
                 image: item.image,
                 timestamp: item.timestamp,
                 link: item.link,
+                publicKey: item.publicKey,
                 ticket: {
                   publicKey: item.ticket.publicKey,
                 },

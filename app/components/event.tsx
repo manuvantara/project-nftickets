@@ -12,6 +12,7 @@ import { COLORS } from '../constants/theme';
 import sv, { VariantProps } from 'style-variants';
 import { timestampToDate } from '../utils/helpers/timestamp-to-date';
 import { type Event } from '../utils/types';
+import { uriToPath } from '../utils/helpers/uri-to-path';
 
 type CardVariantsProps = VariantProps<typeof card>;
 
@@ -73,7 +74,7 @@ export default function EventCard({
         distance={4}
         startColor="rgba(0, 0, 0, 0.15)">
         <FastImage
-          source={{ uri: cover }}
+          source={{ uri: uriToPath(cover) }}
           resizeMode={FastImage.resizeMode.cover}
           style={s.cover}
         />

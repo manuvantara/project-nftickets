@@ -7,7 +7,7 @@ type ButtonVariantsProps = VariantProps<typeof button>;
 
 type ButtonProps = ButtonVariantsProps &
   TouchableOpacityProps & {
-    children: string;
+    children: string[];
   };
 
 const button = sv({

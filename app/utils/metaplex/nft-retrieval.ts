@@ -1,4 +1,5 @@
 import {
+  CandyMachine,
   CandyMachineItem,
   fetchCandyMachine,
 } from '@metaplex-foundation/mpl-candy-machine';
@@ -16,6 +17,7 @@ import {
 import { PublicKey, Umi, publicKey } from '@metaplex-foundation/umi';
 import { GATEWAY_HOST } from './metadata';
 import { EMPTY_EVENT_METADATA } from '../placeholders';
+import { uriToPath } from '../helpers/uri-to-path';
 
 export async function fetchCandyMachineItems(
   umi: Umi,
@@ -39,11 +41,12 @@ export async function fetchMetadataByMint(
 ): Promise<EventMetadata | TicketMetadata | undefined> {
   try {
     const uri = (await fetchDigitalAsset(umi, mintPublicKey)).metadata.uri;
-    const cid = uri.split('/').pop(); // Extract the last part of the uri i.e. cid
+    const path = uriToPath(uri);
 
-    const response = await fetch(`${GATEWAY_HOST}${cid}`);
+    const response = await fetch(path);
     const metadata = await response.json();
 
+    console.log(metadata);
     return metadata;
   } catch (error) {
     console.error('Error fetching metadata:', error);
@@ -60,8 +63,8 @@ export async function fetchMetadatasByUris(
     const fetchPromises: Promise<any>[] = [];
 
     for (const uri of uris) {
-      const cid = uri.split('/').pop();
-      const metadataPromise = fetch(`${GATEWAY_HOST}${cid}`);
+      const path = uriToPath(uri);
+      const metadataPromise = fetch(path);
       fetchPromises.push(metadataPromise);
     }
 
@@ -76,12 +79,12 @@ export async function fetchMetadatasByUris(
   }
 }
 
-export async function fetchTicketsByEvent(
+export async function fetchCandyMachineByEvent(
   umi: Umi,
   eventPublicKey: PublicKey,
-): Promise<string[] | undefined> {
+): Promise<CandyMachine | undefined> {
   try {
-    console.log('Fetching event tickets...');
+    console.log('Fetching event candy machine...');
 
     const eventMetadata = await fetchMetadataByMint(umi, eventPublicKey);
     if (!eventMetadata) return;
@@ -94,7 +97,21 @@ export async function fetchTicketsByEvent(
     }
 
     const candyMachinePublicKey = publicKey(candyMachineTrait.value);
-    const candyMachine = await fetchCandyMachine(umi, candyMachinePublicKey);
+    return await fetchCandyMachine(umi, candyMachinePublicKey);
+  } catch (error) {
+    console.error('Error fetching event candy machine:', error);
+  }
+}
+
+export async function fetchTicketsByEvent(
+  umi: Umi,
+  eventPublicKey: PublicKey,
+): Promise<string[] | undefined> {
+  try {
+    console.log('Fetching event tickets...');
+
+    const candyMachine = await fetchCandyMachineByEvent(umi, eventPublicKey);
+    if (!candyMachine) return;
 
     console.log(candyMachine.items);
     return candyMachine.items.map(item => item.uri);
