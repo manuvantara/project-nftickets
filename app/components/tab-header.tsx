@@ -7,7 +7,7 @@ import { ROUTES } from '../constants/routes';
 import ScannerIcon from '../images/Scanner.svg';
 import AddCircleIcon from '../images/AddCircle.svg';
 
-export default function TabHeader(props: BottomTabHeaderProps) {
+export default function TabHeader({ route, navigation }: BottomTabHeaderProps) {
   const insets = useSafeAreaInsets();
 
   return (
@@ -25,14 +25,16 @@ export default function TabHeader(props: BottomTabHeaderProps) {
         distance={4}
         safeRender={true}
         startColor="rgba(0, 0, 0, 0.15)">
-        <Pressable onPress={() => console.log('pressed')} style={s.button}>
+        <Pressable
+          onPress={() => navigation.navigate(ROUTES.QR_SCANNER)}
+          style={s.button}>
           <ScannerIcon color="black" width={24} height={24} />
         </Pressable>
       </Shadow>
-      <Text style={s.title}>{props.route.name}</Text>
+      <Text style={s.title}>{route.name}</Text>
       <Shadow
         containerStyle={{
-          opacity: ROUTES.TAB.MY_EVENTS === props.route.name ? 1 : 0,
+          opacity: ROUTES.TAB.MY_EVENTS === route.name ? 1 : 0,
         }}
         paintInside={false}
         distance={4}

@@ -9,6 +9,7 @@ export type RootStackParamList = {
   [ROUTES.TICKET]: {
     ticketId: string;
   };
+  [ROUTES.QR_SCANNER]: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =

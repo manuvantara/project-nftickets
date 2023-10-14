@@ -6,4 +6,5 @@ export const ROUTES = {
     MY_TICKETS: 'My Tickets',
   },
   TICKET: 'Ticket',
+  QR_SCANNER: 'QR Scanner',
 } as const;
