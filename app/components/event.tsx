@@ -12,14 +12,13 @@ import { COLORS } from '../constants/theme';
 import sv, { VariantProps } from 'style-variants';
 
 type CardVariantsProps = VariantProps<typeof card>;
+export type EventCard = {
+  cover: string;
+  title: string;
+  date: number;
+};
 
-type CardProps = CardVariantsProps &
-  TouchableOpacityProps & {
-    cover: string;
-    title: string;
-    date: string;
-  };
-
+type CardProps = CardVariantsProps & TouchableOpacityProps & EventCard;
 const card = sv({
   base: {
     borderRadius: 8,

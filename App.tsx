@@ -1,10 +1,10 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ROUTES } from './src/constants/routes';
+import { ROUTES } from './app/constants/routes';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import TabNavigation from './src/components/tab-navigator';
-import UmiProvider from './src/providers/umi-provider';
+import TabNavigation from './app/components/tab-navigator';
+import UmiProvider from './app/providers/umi-provider';
 
 const Stack = createNativeStackNavigator();
 
