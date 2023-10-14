@@ -1,12 +1,10 @@
-import { createCandyMachine, insertNfts, mintNft } from '../src/utils/metaplex/core';
+import { createCandyMachine, insertNfts, mintNft } from '../app/utils/metaplex/core';
 import { mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata';
 import { CandyMachineItem, mplCandyMachine } from '@metaplex-foundation/mpl-candy-machine';
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
 import { PublicKey, createSignerFromKeypair, keypairIdentity } from '@metaplex-foundation/umi';
-import { CANDY_MACHINE_PARAMS, NFT } from '../src/utils/placeholders';
+import { CANDY_MACHINE_PARAMS, NFT } from '../app/utils/placeholders';
 import { it, expect, describe } from '@jest/globals';
-import { fetchCandyMachineItems, fetchNftsMetadata, fetchTicketEventPairsByOwner, fetchTicketsByEvent } from '../src/utils/metaplex/nft-retrieval';
-import { TicketEventPairs } from '../src/utils/types';
 
 
 describe('Main Flow', () => {
@@ -30,9 +28,9 @@ describe('Main Flow', () => {
         expect(unsafeCandyMachinePublicKey).toBeDefined();
     });
 
-    /*const candyMachinePublicKey = unsafeCandyMachinePublicKey as PublicKey;
+    const candyMachinePublicKey = unsafeCandyMachinePublicKey as PublicKey;
     
-    await insertNfts(umi, candyMachinePublicKey, Array(5).fill(NFT));
+    /*await insertNfts(umi, candyMachinePublicKey, Array(5).fill(NFT));
     const unsafeItems = await fetchCandyMachineItems(umi, candyMachinePublicKey);
     it('fetches candy machine items', () => {
         expect(unsafeItems).toBeDefined();
@@ -76,5 +74,5 @@ describe('Main Flow', () => {
             expect(ticket.ticketPublicKey).toBeDefined();
             expect(ticket.eventPublicKey).toBeDefined();     
         }
-    }); */
+    });*/
 });
