@@ -15,6 +15,7 @@ import { MontserratMedium, MontserratSemiBold } from '../text';
 import useUmi from '../../hooks/use-umi';
 import { fetchMetadataByMint } from '../../utils/metaplex/nft-retrieval';
 import { timestampToDate } from '../../utils/helpers/timestamp-to-date';
+import { ExternalLink } from '../external-link';
 
 export default function TicketScreen({
   route,
@@ -127,16 +128,23 @@ export default function TicketScreen({
               {timestampToDate(event.timestamp)}
             </MontserratMedium>
           </View>
-          <Pressable style={s.topCardArrow}>
+          <ExternalLink url={event.link}>
             <ArrowRightUp width={32} height={32} />
-          </Pressable>
+          </ExternalLink>
         </Shadow>
-        <FlipCard
-          side={cardSide}
-          front={FrontSide}
-          back={BackSide}
-          style={s.card}
-        />
+        <Pressable
+          onPress={() =>
+            setCardSide(prev =>
+              prev === FlipSide.BACK ? FlipSide.FRONT : FlipSide.BACK,
+            )
+          }>
+          <FlipCard
+            side={cardSide}
+            front={FrontSide}
+            back={BackSide}
+            style={s.card}
+          />
+        </Pressable>
         <MontserratMedium style={s.hint}>Tap to rotate</MontserratMedium>
         <Button
           style={s.buyButton}
