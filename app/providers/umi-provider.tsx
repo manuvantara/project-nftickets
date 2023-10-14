@@ -7,7 +7,7 @@ import {
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
 import { mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata';
 import { mplCandyMachine } from '@metaplex-foundation/mpl-candy-machine';
-import { AUTHORITY_PRIVATE_KEY } from '@env';
+import Config from 'react-native-config';
 
 export const UmiContext = createContext<Umi | null>(null);
 
@@ -16,8 +16,10 @@ export default function UmiProvider({ children }: { children: JSX.Element }) {
     .use(mplTokenMetadata())
     .use(mplCandyMachine());
 
+  if (!Config.AUTHORITY_PRIVATE_KEY)
+    throw new Error('AUTHORITY_PRIVATE_KEY is not defined');
   const authorityKeypair = umi.eddsa.createKeypairFromSecretKey(
-    new Uint8Array(JSON.parse(AUTHORITY_PRIVATE_KEY)),
+    new Uint8Array(JSON.parse(Config.AUTHORITY_PRIVATE_KEY)),
   );
   const authority = createSignerFromKeypair(umi, authorityKeypair);
   umi.use(keypairIdentity(authority));

@@ -1,11 +1,10 @@
 import { launchImageLibrary } from 'react-native-image-picker';
 import RNFetchBlob from 'rn-fetch-blob';
-
 import {
   fetchMetadataFromSeeds,
   updateV1,
 } from '@metaplex-foundation/mpl-token-metadata';
-import { NFT_STORAGE_API_KEY } from '@env';
+import Config from 'react-native-config';
 import { CandyMachineParams, NftMetadata } from '../types';
 import { PublicKey, Umi } from '@metaplex-foundation/umi';
 import { waitForTransaction } from '../helpers/wait-for-transaction';
@@ -61,7 +60,7 @@ export async function uploadToIpfs(
       method: 'POST',
       headers: {
         Accept: 'application/json',
-        Authorization: `Bearer ${NFT_STORAGE_API_KEY}`,
+        Authorization: `Bearer ${Config.NFT_STORAGE_API_KEY}`,
         'Content-Type': contentType,
       },
       body: data,
