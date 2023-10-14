@@ -9,6 +9,7 @@ import {
 import { EventMetadata, TicketEventPairs, TicketMetadata } from '../types';
 import { PublicKey, Umi, publicKey } from '@metaplex-foundation/umi';
 import { GATEWAY_HOST, fetchNftMetadata } from './metadata';
+import { EMPTY_EVENT_METADATA } from '../placeholders';
 
 export async function fetchCandyMachineItems(
   umi: Umi,
@@ -37,16 +38,16 @@ export async function fetchNftsMetadata(
 
     for (const uri of uris) {
       const cid = uri.split('/').pop();
-      if (cid?.length !== 59) continue;
       const metadataPromise = fetch(`${GATEWAY_HOST}${cid}`);
       fetchPromises.push(metadataPromise);
     }
 
-    const results = await Promise.all(fetchPromises);
-    const jsons = await Promise.all(results.map(r => r.json()));
-    console.log(jsons);
+    const responses = await Promise.all(fetchPromises);
+    const results = await Promise.allSettled(responses.map(r => r.json()));
 
-    return jsons;
+    return results.map(result =>
+      result.status === 'rejected' ? EMPTY_EVENT_METADATA : result.value,
+    );
   } catch (error) {
     console.error('Error fetching NFT metadata:', error);
   }

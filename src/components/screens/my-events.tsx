@@ -1,36 +1,40 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, FlatList, Button } from 'react-native';
+import { StyleSheet, View, FlatList } from 'react-native';
 import CreateNewEvent from '../create-new-event';
 import EventCard, { EventCardProps } from '../event';
+import useUmi from '../../hooks/use-umi';
 import {
   fetchMyEvents,
   fetchNftsMetadata,
 } from '../../utils/metaplex/nft-retrieval';
-import useUmi from '../../hooks/use-umi';
 import { NftMetadata } from '../../utils/types';
 
 export default function MyEventsScreen() {
   const [myEvents, setEvents] = useState<EventCardProps[]>();
-  const { umi } = useUmi();
+  const umi = useUmi();
 
   useEffect(() => {
     async function getMyEvents() {
       try {
-        const myEventAssets = await fetchMyEvents(umi);
-        if (!myEventAssets) return;
+        const eventAssets = await fetchMyEvents(umi);
+        if (!eventAssets) return;
 
-        const eventUris = myEventAssets.map(event => event.metadata.uri);
-        console.log(eventUris);
+        const eventUris = eventAssets.map(event => event.metadata.uri);
+
         const eventMetadatas = await fetchNftsMetadata(eventUris);
         if (!eventMetadatas) return;
 
-        const events = eventMetadatas.map((eventMetadata: NftMetadata) => ({
-          cover: eventMetadata.image,
-          title: eventMetadata.name,
-          date: eventMetadata.attributes[0].value,
-        }));
+        const events = eventMetadatas.map(
+          (eventMetadata: NftMetadata, index: number) => ({
+            cover: eventMetadata.image,
+            title: eventMetadata.name,
+            date: Number(eventMetadata.attributes?.[0]?.value) * 1000 ?? 0,
+            publicKey: eventAssets[index].mint.publicKey,
+          }),
+        );
+        const filteredEvents = events.filter(event => event.title !== '');
 
-        setEvents(events);
+        setEvents(filteredEvents);
       } catch (error) {
         console.error('Error fetching my events:', error);
       }

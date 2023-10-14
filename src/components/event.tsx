@@ -4,11 +4,13 @@ import FastImage from 'react-native-fast-image';
 import { Shadow } from 'react-native-shadow-2';
 import { MontserratMedium } from './text';
 import { COLORS } from '../constants/theme';
+import { PublicKey } from '@metaplex-foundation/umi';
 
 export type EventCardProps = {
   cover: string;
   title: string;
-  date: string;
+  date: number;
+  publicKey: PublicKey;
 };
 
 export default function EventCard({ cover, date, title }: EventCardProps) {

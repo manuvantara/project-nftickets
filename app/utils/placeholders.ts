@@ -1,5 +1,10 @@
 import { ConfigLine } from '@metaplex-foundation/mpl-candy-machine';
-import { CandyMachineParams, EventMetadata, TicketMetadata } from './types';
+import {
+  CandyMachineParams,
+  EventMetadata,
+  NftMetadata,
+  TicketMetadata,
+} from './types';
 import { dateTime, publicKey } from '@metaplex-foundation/umi';
 
 export const NFT: ConfigLine = {
@@ -86,3 +91,31 @@ export const SOME_NFT_COLLECTION = publicKey(
 export const SOME_NFT = publicKey(
   'BWdspE5HaBCg4QKJ7Qw9xgf255UKz6ZRimsQcTXQn1nK',
 );
+
+export const EMPTY_EVENT_METADATA: EventMetadata = {
+  name: '',
+  description: '',
+  image: '',
+  animation_url: '',
+  external_url: '',
+  attributes: [
+    {
+      trait_type: 'start_time',
+      value: '',
+    },
+    {
+      trait_type: 'candy_machine',
+      value: '',
+    },
+  ],
+  properties: {
+    files: [
+      {
+        uri: '',
+        type: 'image/jpg',
+        cdn: false,
+      },
+    ],
+    category: 'banner',
+  },
+};
