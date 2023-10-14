@@ -10,15 +10,14 @@ import { Shadow } from 'react-native-shadow-2';
 import { MontserratMedium } from './text';
 import { COLORS } from '../constants/theme';
 import sv, { VariantProps } from 'style-variants';
+import { timestampToDate } from '../utils/helpers/timestamp-to-date';
+import { type Event } from '../utils/types';
 
 type CardVariantsProps = VariantProps<typeof card>;
-export type EventCard = {
-  cover: string;
-  title: string;
-  date: number;
-};
 
-type CardProps = CardVariantsProps & TouchableOpacityProps & EventCard;
+type CardProps = CardVariantsProps &
+  TouchableOpacityProps &
+  Omit<Event, 'publicKey' | 'image'>;
 const card = sv({
   base: {
     borderRadius: 8,
@@ -51,7 +50,7 @@ const card = sv({
 
 export default function EventCard({
   cover,
-  date,
+  timestamp,
   title,
   size,
   variant,
@@ -65,15 +64,6 @@ export default function EventCard({
   const footerSidePadding = size === 'small' ? 16 : 24;
   const footerDirection = size === 'small' ? 'column' : 'row';
   const gap = size === 'small' ? 8 : 0;
-
-  // day month year 12.12.22
-  const formattedDate = new Date(date)
-    .toLocaleDateString('en-GB', {
-      day: 'numeric',
-      month: '2-digit',
-      year: '2-digit',
-    })
-    .replace(/\//g, '.');
 
   return (
     <TouchableOpacity activeOpacity={0.8} {...rest}>
@@ -98,7 +88,9 @@ export default function EventCard({
             },
           ]}>
           <MontserratMedium style={s.title}>{title}</MontserratMedium>
-          <MontserratMedium style={s.date}>{formattedDate}</MontserratMedium>
+          <MontserratMedium style={s.date}>
+            {timestampToDate(timestamp)}
+          </MontserratMedium>
         </View>
       </Shadow>
     </TouchableOpacity>

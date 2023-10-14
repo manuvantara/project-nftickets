@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
-import EventCard, { EventCard as EventCardProps } from '../event';
+import EventCard from '../event';
 import useUmi from '../../hooks/use-umi';
 import {
   fetchMetadatasByUris,
   fetchTicketEventPairsByOwner,
   fetchUrisByMintList,
 } from '../../utils/metaplex/nft-retrieval';
-import { NftMetadata } from '../../utils/types';
+import { type EventWithTicket, NftMetadata } from '../../utils/types';
+import { ROUTES } from '../../constants/routes';
 
-export default function MyTicketsScreen() {
-  const [events, setEvents] = useState<EventCardProps[]>();
+export default function MyTicketsScreen({ navigation }) {
+  const [events, setEvents] = useState<EventWithTicket[]>();
   const umi = useUmi();
 
   useEffect(() => {
@@ -30,13 +31,23 @@ export default function MyTicketsScreen() {
 
         const events = eventMetadatas.map(
           (eventMetadata: NftMetadata, index: number) => ({
-            cover: eventMetadata.image,
             title: eventMetadata.name,
-            date: Number(eventMetadata.attributes?.[0]?.value) * 1000 ?? 0,
+
+            cover: eventMetadata.properties?.files?.[0]?.uri ?? '',
+            image: eventMetadata.image,
+
+            timestamp: Number(eventMetadata.attributes?.[0]?.value) * 1000 ?? 0,
+            link: eventMetadata.external_url,
+
             publicKey: ticketEventPairs.events[index],
+            ticket: {
+              publicKey: ticketEventPairs.tickets[index],
+            },
           }),
         );
         const filteredEvents = events.filter(event => event.title !== '');
+
+        console.log(filteredEvents);
 
         setEvents(filteredEvents);
       } catch (error) {
@@ -53,7 +64,22 @@ export default function MyTicketsScreen() {
         contentContainerStyle={s.listContainer}
         style={s.list}
         ItemSeparatorComponent={() => <View style={{ height: 24 }} />}
-        renderItem={({ item }) => <EventCard {...item} />}
+        renderItem={({ item }) => (
+          <EventCard
+            onPress={() =>
+              navigation.navigate(ROUTES.TICKET, {
+                title: item.title,
+                image: item.image,
+                timestamp: item.timestamp,
+                link: item.link,
+                ticket: {
+                  publicKey: item.ticket.publicKey,
+                },
+              })
+            }
+            {...item}
+          />
+        )}
       />
     </View>
   );

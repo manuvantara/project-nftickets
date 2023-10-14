@@ -7,7 +7,7 @@ import { ROUTES } from '../../constants/routes';
 const MOCK_EVENT = {
   cover: 'https://picsum.photos/200',
   title: 'Atlass Weekend 2023',
-  date: '2023-04-23',
+  date: 1231231231234000,
 };
 
 const numColumns = 2;

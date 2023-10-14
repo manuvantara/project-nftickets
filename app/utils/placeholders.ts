@@ -13,7 +13,7 @@ export const NFT: ConfigLine = {
 };
 
 export const NFT_METADATA: TicketMetadata = {
-  name: 'Atlass Weekend 2023 Ticket',
+  name: '#123123',
   description: '',
   image: 'should be first uploaded to ipfs/aws',
   animation_url: '',

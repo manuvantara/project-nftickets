@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import LinearGradient from 'react-native-linear-gradient';
@@ -12,19 +12,46 @@ import { RootStackScreenProps } from '../../types/navigation';
 import Button from '../button';
 import FlipCard, { FlipSide } from '../flip-card';
 import { MontserratMedium, MontserratSemiBold } from '../text';
-
-const TOP_CARD_DATA = {
-  image: 'https://picsum.photos/200/300',
-  title: 'Atlass Weekend 2023',
-  date: '12.12.22',
-  link: 'https://atlasfestival.com/',
-};
+import useUmi from '../../hooks/use-umi';
+import { fetchMetadataByMint } from '../../utils/metaplex/nft-retrieval';
+import { timestampToDate } from '../../utils/helpers/timestamp-to-date';
 
 export default function TicketScreen({
   route,
 }: RootStackScreenProps<'Ticket'>) {
+  const event = route.params;
+  console.log(event);
   const insets = useSafeAreaInsets();
   const [cardSide, setCardSide] = useState<FlipSide>(FlipSide.BACK);
+
+  const umi = useUmi();
+  const [ticket, setTicket] = useState<{
+    id: string;
+    image: string;
+    expiryDate: string;
+    type: string;
+  }>();
+
+  useEffect(() => {
+    async function getTicket() {
+      try {
+        const ticket = await fetchMetadataByMint(umi, event.ticket.publicKey);
+        if (!ticket) return;
+
+        setTicket({
+          id: ticket.name,
+          expiryDate: timestampToDate(
+            Number(ticket.attributes?.[0]?.value) ?? 0,
+          ),
+          type: ticket.attributes?.[1]?.value ?? '',
+          image: ticket.image,
+        });
+      } catch (error) {
+        console.error('Error fetching my tickets:', error);
+      }
+    }
+    getTicket();
+  }, []);
 
   console.log('cardSide', cardSide);
 
@@ -43,23 +70,20 @@ export default function TicketScreen({
               Expiry Date
             </MontserratMedium>
             <MontserratMedium style={s.cardHeaderText}>
-              Jan. 01, 2023, 15:00
+              {ticket?.expiryDate}
             </MontserratMedium>
           </View>
           <View style={s.cardHeaderBlock}>
             <MontserratMedium style={s.cardHeaderText}>Ticket</MontserratMedium>
             <MontserratMedium style={s.cardHeaderText}>
-              #113553
+              {ticket?.id}
             </MontserratMedium>
           </View>
         </View>
         <View style={s.cardBody}>
-          <FastImage
-            style={s.cardBodyImage}
-            source={{ uri: TOP_CARD_DATA.image }}
-          />
+          <FastImage style={s.cardBodyImage} source={{ uri: ticket?.image }} />
           <MontserratSemiBold style={s.cardBodyTitle}>
-            {TOP_CARD_DATA.title}
+            {event.title}
           </MontserratSemiBold>
           <MontserratMedium style={s.cardBodyType}>VIP</MontserratMedium>
         </View>
@@ -75,11 +99,11 @@ export default function TicketScreen({
       style={s.cardBackground}>
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <MontserratMedium style={s.cardBodyWatermark}>
-          this is Atlass Weekend 2023 Ticket #1001 purchased on NFTickets
+          This is {event.title} Ticket {ticket?.id} purchased on NFTickets
           platform
         </MontserratMedium>
         <View style={s.cardBodyQrCodeWrapper}>
-          <QRCode size={160} value={TOP_CARD_DATA.link} />
+          <QRCode size={160} value={event.link} />
         </View>
       </View>
     </LinearGradient>
@@ -94,16 +118,13 @@ export default function TicketScreen({
       </View>
       <View style={s.content}>
         <Shadow distance={4} style={s.topCard}>
-          <FastImage
-            style={s.topCardImage}
-            source={{ uri: TOP_CARD_DATA.image }}
-          />
+          <FastImage style={s.topCardImage} source={{ uri: event.image }} />
           <View>
             <MontserratMedium style={s.topCardTitle}>
-              {TOP_CARD_DATA.title}
+              {event.title}
             </MontserratMedium>
             <MontserratMedium style={s.topCardDate}>
-              {TOP_CARD_DATA.date}
+              {timestampToDate(event.timestamp)}
             </MontserratMedium>
           </View>
           <Pressable style={s.topCardArrow}>

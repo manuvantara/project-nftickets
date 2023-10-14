@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, FlatList } from 'react-native';
 import CreateNewEvent from '../create-new-event';
-import EventCard, { EventCard as EventCardProps } from '../event';
+import EventCard from '../event';
 import useUmi from '../../hooks/use-umi';
+import { type Event } from '../../utils/types';
 import {
   fetchEventsByOwner,
   fetchMetadatasByUris,
@@ -10,7 +11,7 @@ import {
 import { NftMetadata } from '../../utils/types';
 
 export default function MyEventsScreen() {
-  const [myEvents, setMyEvents] = useState<EventCardProps[]>();
+  const [myEvents, setMyEvents] = useState<Event[]>();
   const umi = useUmi();
 
   useEffect(() => {
@@ -26,9 +27,14 @@ export default function MyEventsScreen() {
 
         const events = eventMetadatas.map(
           (eventMetadata: NftMetadata, index: number) => ({
-            cover: eventMetadata.image,
             title: eventMetadata.name,
-            date: Number(eventMetadata.attributes?.[0]?.value) * 1000 ?? 0,
+
+            cover: eventMetadata.properties?.files?.[0]?.uri ?? '',
+            image: eventMetadata.image,
+
+            timestamp: Number(eventMetadata.attributes?.[0]?.value) * 1000 ?? 0,
+            link: eventMetadata.external_url,
+
             publicKey: eventAssets[index].mint.publicKey,
           }),
         );

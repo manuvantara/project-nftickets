@@ -3,12 +3,11 @@ import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { StackScreenProps } from '@react-navigation/stack';
 import type { ROUTES } from '../constants/routes';
+import { type EventWithTicket } from '../utils/types';
 
 export type RootStackParamList = {
   [ROUTES.TAB.INDEX]: undefined;
-  [ROUTES.TICKET]: {
-    ticketId: string;
-  };
+  [ROUTES.TICKET]: EventWithTicket;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =

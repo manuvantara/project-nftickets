@@ -78,3 +78,21 @@ export type TicketsAndRespectiveEvents = {
   events: PublicKey[];
   tickets: PublicKey[];
 };
+
+export type Event = {
+  title: string;
+
+  image: string;
+  cover: string;
+
+  timestamp: number;
+  link: string;
+
+  publicKey: PublicKey;
+};
+
+export type EventWithTicket = Event & {
+  ticket: {
+    publicKey: PublicKey;
+  };
+};
