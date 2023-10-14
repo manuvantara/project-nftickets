@@ -4,24 +4,24 @@ import CreateNewEvent from '../create-new-event';
 import EventCard, { EventCard as EventCardProps } from '../event';
 import useUmi from '../../hooks/use-umi';
 import {
-  fetchMyEvents,
-  fetchNftsMetadata,
+  fetchEventsByOwner,
+  fetchMetadatasByUris,
 } from '../../utils/metaplex/nft-retrieval';
 import { NftMetadata } from '../../utils/types';
 
 export default function MyEventsScreen() {
-  const [myEvents, setEvents] = useState<EventCardProps[]>();
+  const [myEvents, setMyEvents] = useState<EventCardProps[]>();
   const umi = useUmi();
 
   useEffect(() => {
     async function getMyEvents() {
       try {
-        const eventAssets = await fetchMyEvents(umi);
+        const eventAssets = await fetchEventsByOwner(umi);
         if (!eventAssets) return;
 
         const eventUris = eventAssets.map(event => event.metadata.uri);
 
-        const eventMetadatas = await fetchNftsMetadata(eventUris);
+        const eventMetadatas = await fetchMetadatasByUris(eventUris);
         if (!eventMetadatas) return;
 
         const events = eventMetadatas.map(
@@ -34,7 +34,7 @@ export default function MyEventsScreen() {
         );
         const filteredEvents = events.filter(event => event.title !== '');
 
-        setEvents(filteredEvents);
+        setMyEvents(filteredEvents);
       } catch (error) {
         console.error('Error fetching my events:', error);
       }
