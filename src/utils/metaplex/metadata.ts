@@ -1,5 +1,5 @@
 import { launchImageLibrary } from 'react-native-image-picker';
-import RNFetchBlob from 'rn-fetch-blob';
+import ReactNativeBlobUtil from 'react-native-blob-util'
 
 import {
   fetchDigitalAsset,
@@ -36,7 +36,7 @@ export async function uploadImage(): Promise<string | undefined> {
     const imagePath = selectedPhoto.uri;
 
     // Read the image file and get the base64 string.
-    const imageBytesInBase64: string = await RNFetchBlob.fs.readFile(
+    const imageBytesInBase64: string = await ReactNativeBlobUtil.fs.readFile(
       imagePath,
       'base64',
     );
