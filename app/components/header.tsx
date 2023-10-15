@@ -9,15 +9,26 @@ import ArrowLeft from '../images/AltArrowLeft.svg';
 
 type Props = {
   title?: string;
+  backButtonOnPress?: () => void;
 };
 
-export default function Header({title}: Props) {
+export default function Header({ title, backButtonOnPress }: Props) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
 
+  const handleBackButtonOnPress = () => {
+    navigation?.goBack();
+  };
+
   return (
     <View style={[s.header, , { paddingTop: insets.top + 8 }]}>
-      <Pressable style={s.backButton} onPress={() => navigation?.goBack()}>
+      <Pressable
+        style={s.backButton}
+        onPress={
+          backButtonOnPress
+            ? () => backButtonOnPress()
+            : handleBackButtonOnPress
+        }>
         <Shadow distance={4} style={s.backButton}>
           <ArrowLeft width={24} height={24} />
         </Shadow>
@@ -62,5 +73,5 @@ const s = StyleSheet.create({
   emptyView: {
     width: 40,
     height: 40,
-  }
+  },
 });
