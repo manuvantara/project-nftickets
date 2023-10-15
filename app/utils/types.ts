@@ -94,5 +94,6 @@ export type Event = {
 export type EventWithTicket = Event & {
   ticket: {
     publicKey: PublicKey;
+    bought: boolean;
   };
 };

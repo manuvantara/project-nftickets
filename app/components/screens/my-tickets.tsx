@@ -7,8 +7,9 @@ import {
   fetchTicketEventPairsByOwner,
   fetchUrisByMintList,
 } from '../../utils/metaplex/nft-retrieval';
-import { type EventWithTicket, NftMetadata } from '../../utils/types';
+import { type EventWithTicket } from '../../utils/types';
 import { ROUTES } from '../../constants/routes';
+import { isEvent } from '../../utils/helpers/type-guards';
 
 export default function MyTicketsScreen({ navigation }) {
   const [events, setEvents] = useState<EventWithTicket[]>();
@@ -18,38 +19,38 @@ export default function MyTicketsScreen({ navigation }) {
     async function getMyTickets() {
       try {
         const ticketEventPairs = await fetchTicketEventPairsByOwner(umi);
-        if (!ticketEventPairs) return;
-
         const eventUris = await fetchUrisByMintList(
           umi,
           ticketEventPairs.events,
         );
-        if (!eventUris) return;
-
         const eventMetadatas = await fetchMetadatasByUris(eventUris);
-        if (!eventMetadatas) return;
+        if (!eventMetadatas.every(isEvent)) {
+          throw new Error('Encountered wrong event format.');
+        }
 
-        const events = eventMetadatas.map(
-          (eventMetadata: NftMetadata, index: number) => ({
-            title: eventMetadata.name,
+        const events = eventMetadatas.map((eventMetadata, index) => ({
+          title: eventMetadata.name,
 
-            cover: eventMetadata.properties?.files?.[0]?.uri ?? '',
-            image: eventMetadata.image,
+          cover: eventMetadata.properties.files[0].uri,
+          image: eventMetadata.image,
 
-            timestamp: Number(eventMetadata.attributes?.[0]?.value) * 1000 ?? 0,
-            link: eventMetadata.external_url,
+          timestamp: Number(eventMetadata.attributes[0].value) * 1000,
+          link: eventMetadata.external_url,
 
-            publicKey: ticketEventPairs.events[index],
-            ticket: {
-              publicKey: ticketEventPairs.tickets[index],
-            },
-          }),
-        );
+          publicKey: ticketEventPairs.events[index],
+          ticket: {
+            publicKey: ticketEventPairs.tickets[index],
+            bought: true,
+          },
+        }));
         const filteredEvents = events.filter(event => event.title !== '');
 
         setEvents(filteredEvents);
       } catch (error) {
-        console.error('Error fetching my tickets:', error);
+        console.error(
+          'Error fetching my tickets or corresponding events',
+          error,
+        );
       }
     }
     getMyTickets();
@@ -73,6 +74,7 @@ export default function MyTicketsScreen({ navigation }) {
                 publicKey: item.publicKey,
                 ticket: {
                   publicKey: item.ticket.publicKey,
+                  bought: item.ticket.bought,
                 },
               })
             }

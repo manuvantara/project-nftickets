@@ -18,21 +18,17 @@ export default function MyEventsScreen() {
     async function getMyEvents() {
       try {
         const eventAssets = await fetchEventsByOwner(umi);
-        if (!eventAssets) return;
-
         const eventUris = eventAssets.map(event => event.metadata.uri);
-
         const eventMetadatas = await fetchMetadatasByUris(eventUris);
-        if (!eventMetadatas) return;
 
         const events = eventMetadatas.map(
           (eventMetadata: NftMetadata, index: number) => ({
             title: eventMetadata.name,
 
-            cover: eventMetadata.properties?.files?.[0]?.uri ?? '',
+            cover: eventMetadata.properties.files[0].uri,
             image: eventMetadata.image,
 
-            timestamp: Number(eventMetadata.attributes?.[0]?.value) * 1000 ?? 0,
+            timestamp: Number(eventMetadata.attributes[0].value) * 1000,
             link: eventMetadata.external_url,
 
             publicKey: eventAssets[index].mint.publicKey,

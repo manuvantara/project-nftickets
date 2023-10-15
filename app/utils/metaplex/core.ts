@@ -27,7 +27,7 @@ import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 export async function createCandyMachine(
   umi: Umi,
   candyMachineParams: CandyMachineParams,
-): Promise<PublicKey | undefined> {
+): Promise<PublicKey> {
   try {
     console.log('Creating candy machine...');
 
@@ -35,7 +35,6 @@ export async function createCandyMachine(
       umi,
       candyMachineParams.metadata,
     );
-    if (!collectionMintPublicKey) return;
 
     const candyMachine = generateSigner(umi);
     const { signature } = await (
@@ -84,14 +83,15 @@ export async function createCandyMachine(
 
     return candyMachine.publicKey;
   } catch (error) {
-    console.error('Error creating candy machine:', error);
+    console.error('createCandyMachine', error);
+    throw new Error('Error creating candy machine');
   }
 }
 
 export async function mintNftCollection(
   umi: Umi,
   nftMetadata: NftMetadata,
-): Promise<PublicKey | undefined> {
+): Promise<PublicKey> {
   try {
     console.log('Minting NFT collection...');
 
@@ -112,7 +112,8 @@ export async function mintNftCollection(
 
     return collectionMint.publicKey;
   } catch (error) {
-    console.error('Error generating NFT collection:', error);
+    console.error('mintNftCollection', error);
+    throw new Error('Error generating NFT collection');
   }
 }
 
@@ -135,7 +136,8 @@ export async function insertNfts(
 
     console.log(`Successfully inserted ${nfts.length} NFTs`);
   } catch (error) {
-    console.error('Error inserting NFTs:', error);
+    console.error('insertNfts', error);
+    throw new Error('Error inserting NFTs');
   }
 }
 
@@ -143,7 +145,7 @@ export async function mintNft(
   umi: Umi,
   candyMachinePublicKey: PublicKey,
   treasury: PublicKey,
-): Promise<PublicKey | undefined> {
+): Promise<PublicKey> {
   try {
     console.log('Minting NFT...');
     const candyMachine = await fetchCandyMachine(umi, candyMachinePublicKey);
@@ -171,6 +173,7 @@ export async function mintNft(
 
     return nftMint.publicKey;
   } catch (error) {
-    console.error('Error minting NFT:', error);
+    console.error('mintNft', error);
+    throw new Error('Error minting NFT');
   }
 }

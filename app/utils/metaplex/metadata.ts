@@ -15,7 +15,6 @@ export const GATEWAY_HOST = 'https://nftstorage.link/ipfs/';
 
 export async function uploadImage(): Promise<string | undefined> {
   try {
-    console.log('Uploading image...');
     // Select an image from the user's device
     const photo = await launchImageLibrary({
       selectionLimit: 1,
@@ -46,16 +45,16 @@ export async function uploadImage(): Promise<string | undefined> {
     );
     return `${imageUpload.value.cid}`;
   } catch (error) {
-    console.error('Error uploading image:', error);
+    console.error('uploadImage', error);
+    throw new Error('Error uploading image');
   }
 }
 
 export async function uploadToIpfs(
   data: any,
   contentType: 'image/jpg' | 'application/json',
-): Promise<{ value: { cid: string } } | undefined> {
+): Promise<{ value: { cid: string } }> {
   try {
-    console.log('Uploading to ipfs...');
     const upload = await fetch('https://api.nft.storage/upload', {
       method: 'POST',
       headers: {
@@ -68,27 +67,24 @@ export async function uploadToIpfs(
 
     return await upload.json();
   } catch (error) {
-    console.error('Error uploading to IPFS:', error);
+    console.error('uploadToIpfs', error);
+    throw new Error('Error uploading to IPFS');
   }
 }
 
 export async function uploadMetadata(
   nftMetadata: NftMetadata,
-): Promise<string | undefined> {
+): Promise<string> {
   try {
-    console.log('Uploading metadata...');
     const metadataUpload = await uploadToIpfs(
       JSON.stringify(nftMetadata),
       'application/json',
     );
-    if (!metadataUpload) return;
 
-    console.log(
-      `The metadata was uploaded uploaded to ${GATEWAY_HOST}${metadataUpload.value.cid}`,
-    );
     return `${metadataUpload.value.cid}`;
   } catch (error) {
-    console.error('Error uploading metadata:', error);
+    console.error('uploadMetadata', error);
+    throw new Error('Error uploading metadata');
   }
 }
 
@@ -97,8 +93,6 @@ export async function updateTicketVisits(
   nftMintPublicKey: PublicKey,
 ): Promise<void> {
   try {
-    console.log('Updating ticket`s metadata...');
-
     const initialMetadata = await fetchMetadataByMint(umi, nftMintPublicKey);
     if (!initialMetadata) return;
 
@@ -120,10 +114,9 @@ export async function updateTicketVisits(
       data: { ...nftMetadataAccount, uri: `${PREFIX_URI}${cid}` },
     }).sendAndConfirm(umi);
     await waitForTransaction(umi, signature);
-
-    console.log('Ticket`s metadata was successfully updated');
   } catch (error) {
-    console.error('Error updating ticket`s metadata:', error);
+    console.error('updateTicketVisits', error);
+    throw new Error('Error updating ticket`s metadata');
   }
 }
 
@@ -132,17 +125,14 @@ export async function updateEventMetadata(
   collectionMintPublicKey: PublicKey,
   candyMachinePublicKey: PublicKey,
   candyMachineParams: CandyMachineParams,
-): Promise<string | undefined> {
+): Promise<string> {
   try {
-    console.log('Updating event`s metadata...');
-
     const updatedMetadata = candyMachineParams.metadata;
     updatedMetadata.attributes[0].value =
       candyMachineParams.startDate.toString();
     updatedMetadata.attributes[1].value = candyMachinePublicKey;
 
     const cid = await uploadMetadata(updatedMetadata);
-    if (!cid) return;
 
     const collectionMetadataAccount = await fetchMetadataFromSeeds(umi, {
       mint: collectionMintPublicKey,
@@ -155,8 +145,9 @@ export async function updateEventMetadata(
     }).sendAndConfirm(umi);
     await waitForTransaction(umi, signature);
 
-    console.log('Event`s metadata was successfully updated');
+    return cid;
   } catch (error) {
-    console.error('Error updating event`s metadata:', error);
+    console.error('updateEventMetadata', error);
+    throw new Error('Error updating event`s metadata');
   }
 }

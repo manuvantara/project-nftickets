@@ -22,13 +22,18 @@ import { fetchCandyGuard } from '@metaplex-foundation/mpl-candy-machine';
 import Header from '../header';
 
 import { uriToPath } from '../../utils/helpers/uri-to-path';
-import {
-  PublicKey,
-  displayAmount,
-  publicKey,
-  sol,
-} from '@metaplex-foundation/umi';
+import { PublicKey, displayAmount, sol } from '@metaplex-foundation/umi';
 import { mintNft } from '../../utils/metaplex/core';
+import { TicketMetadata } from '../../utils/types';
+import { isTicket } from '../../utils/helpers/type-guards';
+
+function isTicketExpired(ticket: TicketMetadata): boolean {
+  return (
+    Number(ticket.attributes[0].value) * 1000 < Date.now() ||
+    (ticket.attributes[2].value !== '-1' &&
+      Number(ticket.attributes[3].value) > Number(ticket.attributes[2].value))
+  );
+}
 
 export default function TicketScreen({
   route,
@@ -46,7 +51,6 @@ export default function TicketScreen({
     type: string;
     expired: boolean;
   }>();
-
   const [purchaseDetails, setPurchaseDetails] = useState<{
     destination: PublicKey;
     price: string;
@@ -57,44 +61,42 @@ export default function TicketScreen({
     async function getTicket() {
       try {
         const ticket = await fetchMetadataByMint(umi, event.ticket.publicKey);
-        if (!ticket) return;
-
-        const expired =
-          Number(ticket.attributes?.[0]?.value) * 1000 < Date.now() ||
-          (ticket.attributes?.[2]?.value !== '-1' &&
-            Number(ticket.attributes?.[3]?.value) >
-              Number(ticket.attributes?.[2]?.value));
+        if (!isTicket(ticket))
+          throw new Error('Encountered wrong ticket format.');
 
         setTicket({
           id: ticket.name,
           expiryDate: timestampToDate(
-            Number(ticket.attributes?.[0]?.value) * 1000 ?? 0,
+            Number(ticket.attributes[0].value) * 1000,
           ),
-          type: ticket.attributes?.[1]?.value ?? '',
+          type: ticket.attributes[1].value,
           image: ticket.image,
-          expired: expired,
+          expired: isTicketExpired(ticket),
         });
 
-        const candyMachine = await fetchCandyMachineByEvent(
-          umi,
-          event.publicKey,
-        );
-        if (!candyMachine) return;
-        const candyGuard = await fetchCandyGuard(
-          umi,
-          candyMachine.mintAuthority,
-        );
-        if (!candyGuard) return;
-        if (candyGuard.guards.solPayment.__option !== 'Some') {
-          throw new Error('Could not fetch purchase details');
+        if (!event.ticket.bought) {
+          const candyMachine = await fetchCandyMachineByEvent(
+            umi,
+            event.publicKey,
+          );
+          const candyGuard = await fetchCandyGuard(
+            umi,
+            candyMachine.mintAuthority,
+          );
+          if (candyGuard.guards.solPayment.__option !== 'Some')
+            throw new Error('Failed to retrieve guard details.');
+
+          setPurchaseDetails({
+            destination: candyGuard.guards.solPayment.value.destination,
+            price: displayAmount(
+              candyGuard.guards.solPayment.value.lamports,
+              3,
+            ),
+            candyMachinePublicKey: candyMachine.publicKey,
+          });
         }
-        setPurchaseDetails({
-          destination: candyGuard.guards.solPayment.value.destination,
-          price: displayAmount(candyGuard.guards.solPayment.value.lamports, 3),
-          candyMachinePublicKey: candyMachine.publicKey,
-        });
       } catch (error) {
-        console.error('Error fetching ticket:', error);
+        console.error('Error fetching ticket data.', error);
       }
     }
 
@@ -196,20 +198,22 @@ export default function TicketScreen({
           />
         </Pressable>
         <MontserratMedium style={s.hint}>Tap to rotate</MontserratMedium>
-        <Button
-          style={s.buyButton}
-          disabled={
-            !purchaseDetails?.candyMachinePublicKey || !purchaseDetails?.price
-          }
-          onPress={() =>
-            mintNft(
-              umi,
-              purchaseDetails!.candyMachinePublicKey,
-              purchaseDetails!.destination,
-            )
-          }>
-          Buy for {purchaseDetails?.price ?? displayAmount(sol(0), 3)}
-        </Button>
+        {!event.ticket.bought && (
+          <Button
+            style={s.buyButton}
+            disabled={
+              !purchaseDetails?.candyMachinePublicKey || !purchaseDetails?.price
+            }
+            onPress={() =>
+              mintNft(
+                umi,
+                purchaseDetails!.candyMachinePublicKey,
+                purchaseDetails!.destination,
+              )
+            }>
+            Buy for {purchaseDetails?.price ?? displayAmount(sol(0), 3)}
+          </Button>
+        )}
       </View>
     </ScrollView>
   );
