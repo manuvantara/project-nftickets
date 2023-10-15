@@ -24,9 +24,8 @@ export default function MyTicketsScreen({ navigation }) {
           ticketEventPairs.events,
         );
         const eventMetadatas = await fetchMetadatasByUris(eventUris);
-        if (!eventMetadatas.every(isEvent)) {
+        if (!eventMetadatas.every(isEvent))
           throw new Error('Encountered wrong event format.');
-        }
 
         const events = eventMetadatas.map((eventMetadata, index) => ({
           title: eventMetadata.name,

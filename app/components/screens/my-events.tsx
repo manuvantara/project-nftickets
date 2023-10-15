@@ -18,6 +18,7 @@ export default function MyEventsScreen() {
     async function getMyEvents() {
       try {
         const eventAssets = await fetchEventsByOwner(umi);
+        console.log(eventAssets.map(eventAsset => eventAsset.mint.publicKey));
         const eventUris = eventAssets.map(event => event.metadata.uri);
         const eventMetadatas = await fetchMetadatasByUris(eventUris);
 

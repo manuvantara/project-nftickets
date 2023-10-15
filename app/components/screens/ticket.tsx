@@ -31,7 +31,7 @@ function isTicketExpired(ticket: TicketMetadata): boolean {
   return (
     Number(ticket.attributes[0].value) * 1000 < Date.now() ||
     (ticket.attributes[2].value !== '-1' &&
-      Number(ticket.attributes[3].value) > Number(ticket.attributes[2].value))
+      Number(ticket.attributes[3].value) >= Number(ticket.attributes[2].value))
   );
 }
 
@@ -61,30 +61,30 @@ export default function TicketScreen({
   useEffect(() => {
     async function getTicket() {
       try {
-        const ticket = await fetchMetadataByMint(umi, event.ticket.publicKey);
-        if (!isTicket(ticket))
-          throw new Error('Encountered wrong ticket format.');
+        if (event.ticket.bought) {
+          const ticket = await fetchMetadataByMint(umi, event.ticket.publicKey);
+          if (!isTicket(ticket))
+            throw new Error('Encountered wrong ticket format.');
 
-        setTicket({
-          id: ticket.name,
-          expiryDate: timestampToDate(
-            Number(ticket.attributes[0].value) * 1000,
-          ),
-          type: ticket.attributes[1].value,
-          image: ticket.image,
-          expired: isTicketExpired(ticket),
-        });
-
-        if (!event.ticket.bought) {
+          setTicket({
+            id: ticket.name,
+            expiryDate: timestampToDate(
+              Number(ticket.attributes[0].value) * 1000,
+            ),
+            type: ticket.attributes[1].value,
+            image: ticket.image,
+            expired: isTicketExpired(ticket),
+          });
+        } else {
           const candyMachine = await fetchCandyMachineByEvent(
             umi,
             event.publicKey,
           );
+
           const candyGuard = await fetchCandyGuard(
             umi,
             candyMachine.mintAuthority,
           );
-          console.log(candyGuard.guards);
           if (
             candyGuard.guards.solPayment.__option !== 'Some' ||
             candyGuard.guards.startDate.__option !== 'Some'
@@ -129,20 +129,24 @@ export default function TicketScreen({
               Expiry Date
             </MontserratMedium>
             <MontserratMedium style={s.cardHeaderText}>
-              {ticket?.expiryDate}
+              {ticket?.expiryDate ?? '#$%^&*'}
             </MontserratMedium>
           </View>
           <View style={s.cardHeaderBlock}>
             <MontserratMedium style={s.cardHeaderText}>Ticket</MontserratMedium>
             <MontserratMedium style={s.cardHeaderText}>
-              {ticket?.id}
+              {ticket?.id ?? '#$%^&*'}
             </MontserratMedium>
           </View>
         </View>
         <View style={s.cardBody}>
           <FastImage
             style={s.cardBodyImage}
-            source={{ uri: uriToPath(ticket?.image ?? '') }}
+            source={
+              event.ticket.bought
+                ? { uri: uriToPath(ticket?.image ?? '') }
+                : require('../../images/DefaultTicketImage.png')
+            }
           />
           <MontserratSemiBold style={s.cardBodyTitle}>
             {event.title}
@@ -193,20 +197,31 @@ export default function TicketScreen({
             <ArrowRightUp width={32} height={32} />
           </ExternalLink>
         </Shadow>
-        <Pressable
-          onPress={() =>
-            setCardSide(prev =>
-              prev === FlipSide.BACK ? FlipSide.FRONT : FlipSide.BACK,
-            )
-          }>
+        {event.ticket.bought ? (
+          <>
+            <Pressable
+              onPress={() =>
+                setCardSide(prev =>
+                  prev === FlipSide.BACK ? FlipSide.FRONT : FlipSide.BACK,
+                )
+              }>
+              <FlipCard
+                side={cardSide}
+                front={FrontSide}
+                back={BackSide}
+                style={s.card}
+              />
+            </Pressable>
+            <MontserratMedium style={s.hint}>Tap to rotate</MontserratMedium>
+          </>
+        ) : (
           <FlipCard
             side={cardSide}
             front={FrontSide}
             back={BackSide}
             style={s.card}
           />
-        </Pressable>
-        <MontserratMedium style={s.hint}>Tap to rotate</MontserratMedium>
+        )}
         {!event.ticket.bought && (
           <Button
             style={s.buyButton}
