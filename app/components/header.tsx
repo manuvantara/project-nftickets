@@ -23,8 +23,8 @@ export default function Header({title}: Props) {
         </Shadow>
       </Pressable>
       <MontserratSemiBold style={s.title}>{title}</MontserratSemiBold>
-      {/* We need this empty text, so the title will be centered */}
-      <MontserratSemiBold />
+      {/* We need this empty view, so the title will be centered */}
+      <View style={s.emptyView} />
     </View>
   );
 }
@@ -59,4 +59,8 @@ const s = StyleSheet.create({
     textAlign: 'center',
     color: COLORS.black,
   },
+  emptyView: {
+    width: 40,
+    height: 40,
+  }
 });
