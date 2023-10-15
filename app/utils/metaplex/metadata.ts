@@ -43,7 +43,7 @@ export async function uploadImage(): Promise<string | undefined> {
     console.log(
       `The image was uploaded uploaded to ${GATEWAY_HOST}${imageUpload.value.cid}`,
     );
-    return `${imageUpload.value.cid}`;
+    return `${PREFIX_URI}${imageUpload.value.cid}`;
   } catch (error) {
     console.error('uploadImage', error);
     throw new Error('Error uploading image');
