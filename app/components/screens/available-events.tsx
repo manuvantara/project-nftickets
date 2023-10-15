@@ -25,31 +25,15 @@ export default function AvailableEventsScreen({
   navigation,
 }: RootTabScreenProps<'Available Events'>) {
   const [events, setEvents] = useState<Event[]>();
-  const eventsList = [
-    '5bkozebdDcdYhLNZVUXMhKyG422ybfZy3wY2nV35JzLh',
-    'AXiwZHnVQJN9VnuF2BxLsg29rzgPaBRfjqjo1u3P97cL',
-    'EtsN7cvqBQW3gGj5f55CFiGe2yVUTrQ2wrpBDKNbVLiX',
-    'wYR5wUtk6V1BdXQqBmUVs7YRBZQjvVzMHfEMZiRPkue',
-    'DgQY8ag2BsvZU3sDMtSPgJ6wDnM2SGxLXfZDr97hSU55',
-    'Cofbbs7Mgvjz8M9LyyBhEyDYJG2mMYn7Qj4tUJ5ByfSf',
-    '135ZtKsHCa6ESrJfmvqYkCs5bwGGa9aKi3CaX8yq4C5j',
-    '7FAbQvi7z6pFsCXDoEo6iFoX7raVDw7omdR3YDaukqCN',
-    '3EvbbDrgva3QQhzVzZsfKDo2EyB1oDNJxNT1f7Px3dJ8',
-    'CtrY5F2JqDrqMdmxZ1kT4naXCQYGeoYRqH9jxr8gJULc',
-    'Gd1ZmsDdhG7VWJxmP1D4vU3yahrkPUYAaNwRr1ceSTVh',
-    'DH9N8ovFhuvhRfCF8dmSXUXJavRZeJDKnPA3vVQqAGBP',
-    'NvsiJkPzAx4k2EiSt15fiMhcfzHNcpCkcyQhvmgNWWN',
-    'ByGd6WmSQw9jC4MJhckJPR4bSdvnoK6NDsTRZUUKxowZ',
-    '6hQCkUd5CHQJKeYSwWAVPochR1KkUDcsf3Q4gzrkukXB',
-    'HWn4z7FXuGdrue6wjcqfTUhhQgHooKPiUEnpJ4gCKxJC',
-    '25SxGK4D8nyFHdPTKzcZiTVyTQBtaT4rA3XZS2dKa9yz',
-    '3MXToKsUgTPJmvD63isvz3LoLmW3S8T1nAYpyDQ3ReW9',
-  ];
 
   const umi = useUmi();
   useEffect(() => {
     async function getMyTickets() {
       try {
+        const response = await fetch(
+          'https://available-events-api.onrender.com/events',
+        );
+        const eventsList = (await response.json()).events.eventPublicKeys;
         const eventUris = await fetchUrisByMintList(
           umi,
           eventsList.map(event => publicKey(event)),
@@ -57,26 +41,18 @@ export default function AvailableEventsScreen({
         const eventMetadatas = await fetchMetadatasByUris(eventUris);
         if (!eventMetadatas.every(isEvent))
           throw new Error('Encountered wrong event format.');
-
         const events = eventMetadatas.map((eventMetadata, index) => ({
           title: eventMetadata.name,
-
           cover: eventMetadata.properties.files[0].uri,
           image: eventMetadata.image,
-
           timestamp: Number(eventMetadata.attributes[0].value) * 1000,
           link: eventMetadata.external_url,
-
           publicKey: publicKey(eventsList[index]),
         }));
         const filteredEvents = events.filter(event => event.title !== '');
-
         setEvents(filteredEvents);
       } catch (error) {
-        console.error(
-          'Error fetching my tickets or corresponding events',
-          error,
-        );
+        console.error('Error fetching avaliable events', error);
       }
     }
     getMyTickets();
