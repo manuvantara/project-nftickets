@@ -10,6 +10,7 @@ import { COLORS } from '../constants/theme';
 import { MontserratSemiBold } from './text';
 
 export default function TabHeader({ route, navigation }: BottomTabHeaderProps) {
+  const { navigate } = navigation;
   const insets = useSafeAreaInsets();
 
   return (
@@ -27,9 +28,7 @@ export default function TabHeader({ route, navigation }: BottomTabHeaderProps) {
         distance={4}
         safeRender={true}
         startColor="rgba(0, 0, 0, 0.15)">
-        <Pressable
-          onPress={() => navigation.navigate(ROUTES.QR_SCANNER)}
-          style={s.button}>
+        <Pressable onPress={() => navigate(ROUTES.QR_SCANNER)} style={s.button}>
           <ScannerIcon color="black" width={24} height={24} />
         </Pressable>
       </Shadow>
@@ -42,7 +41,9 @@ export default function TabHeader({ route, navigation }: BottomTabHeaderProps) {
         distance={4}
         safeRender={true}
         startColor="rgba(0, 0, 0, 0.15)">
-        <Pressable onPress={() => console.log('pressed')} style={s.button}>
+        <Pressable
+          onPress={() => navigate(ROUTES.CREATE_EVENT.INDEX)}
+          style={s.button}>
           <AddCircleIcon color="black" width={28} height={28} />
         </Pressable>
       </Shadow>
