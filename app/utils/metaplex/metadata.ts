@@ -128,8 +128,6 @@ export async function updateEventMetadata(
 ): Promise<string> {
   try {
     const updatedMetadata = candyMachineParams.metadata;
-    updatedMetadata.attributes[0].value =
-      candyMachineParams.startDate.toString();
     updatedMetadata.attributes[1].value = candyMachinePublicKey;
 
     const cid = await uploadMetadata(updatedMetadata);
