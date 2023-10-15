@@ -1,11 +1,9 @@
 import {
   TokenStandard,
   createNft,
-  mplTokenMetadata,
 } from '@metaplex-foundation/mpl-token-metadata';
 import {
   PublicKey,
-  Signer,
   Umi,
   generateSigner,
   percentAmount,
@@ -22,45 +20,34 @@ import {
   create,
   fetchCandyMachine,
   mintV2,
-  mplCandyMachine,
 } from '@metaplex-foundation/mpl-candy-machine';
 import { PREFIX_URI, updateEventMetadata } from './metadata';
 import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
-import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
-
-export function initializeUmi() {
-  return createUmi('https://api.devnet.solana.com')
-    .use(mplTokenMetadata())
-    .use(mplCandyMachine());
-}
 
 export async function createCandyMachine(
   umi: Umi,
-  authority: Signer,
   candyMachineParams: CandyMachineParams,
-): Promise<PublicKey | undefined> {
+): Promise<PublicKey> {
   try {
     console.log('Creating candy machine...');
 
     const collectionMintPublicKey = await mintNftCollection(
       umi,
-      authority,
       candyMachineParams.metadata,
     );
-    if (!collectionMintPublicKey) return;
 
     const candyMachine = generateSigner(umi);
     const { signature } = await (
       await create(umi, {
         candyMachine,
         collectionMint: publicKey(collectionMintPublicKey),
-        collectionUpdateAuthority: authority,
+        collectionUpdateAuthority: umi.payer,
         tokenStandard: TokenStandard.NonFungible,
         sellerFeeBasisPoints: percentAmount(0),
         itemsAvailable: candyMachineParams.itemsAvailable,
         creators: [
           {
-            address: authority.publicKey,
+            address: umi.payer.publicKey,
             verified: true,
             percentageShare: 100,
           },
@@ -89,7 +76,6 @@ export async function createCandyMachine(
 
     await updateEventMetadata(
       umi,
-      authority,
       collectionMintPublicKey,
       candyMachine.publicKey,
       candyMachineParams,
@@ -97,22 +83,22 @@ export async function createCandyMachine(
 
     return candyMachine.publicKey;
   } catch (error) {
-    console.error('Error creating candy machine:', error);
+    console.error('createCandyMachine', error);
+    throw new Error('Error creating candy machine');
   }
 }
 
 export async function mintNftCollection(
   umi: Umi,
-  authority: Signer,
   nftMetadata: NftMetadata,
-): Promise<PublicKey | undefined> {
+): Promise<PublicKey> {
   try {
     console.log('Minting NFT collection...');
 
     const collectionMint = generateSigner(umi);
     const { signature } = await createNft(umi, {
       mint: collectionMint,
-      authority: authority,
+      authority: umi.payer,
       name: nftMetadata.name,
       uri: '',
       sellerFeeBasisPoints: percentAmount(0),
@@ -126,7 +112,8 @@ export async function mintNftCollection(
 
     return collectionMint.publicKey;
   } catch (error) {
-    console.error('Error generating NFT collection:', error);
+    console.error('mintNftCollection', error);
+    throw new Error('Error generating NFT collection');
   }
 }
 
@@ -145,20 +132,20 @@ export async function insertNfts(
       index: candyMachine.itemsLoaded,
       configLines: nfts,
     }).sendAndConfirm(umi);
-    waitForTransaction(umi, signature);
+    await waitForTransaction(umi, signature);
 
     console.log(`Successfully inserted ${nfts.length} NFTs`);
   } catch (error) {
-    console.error('Error inserting NFTs:', error);
+    console.error('insertNfts', error);
+    throw new Error('Error inserting NFTs');
   }
 }
 
 export async function mintNft(
   umi: Umi,
-  authorityPublicKey: PublicKey,
   candyMachinePublicKey: PublicKey,
   treasury: PublicKey,
-): Promise<PublicKey | undefined> {
+): Promise<PublicKey> {
   try {
     console.log('Minting NFT...');
     const candyMachine = await fetchCandyMachine(umi, candyMachinePublicKey);
@@ -171,14 +158,14 @@ export async function mintNft(
           candyMachine: candyMachine.publicKey,
           nftMint: nftMint,
           collectionMint: candyMachine.collectionMint,
-          collectionUpdateAuthority: authorityPublicKey,
+          collectionUpdateAuthority: umi.payer.publicKey,
           mintArgs: {
             solPayment: some({ destination: treasury }),
           },
         }),
       )
       .sendAndConfirm(umi);
-    waitForTransaction(umi, signature);
+    await waitForTransaction(umi, signature);
 
     console.log(
       `Successfully minted an NFT to https://explorer.solana.com/address/${nftMint.publicKey}?cluster=devnet$`,
@@ -186,6 +173,7 @@ export async function mintNft(
 
     return nftMint.publicKey;
   } catch (error) {
-    console.error('Error minting NFT:', error);
+    console.error('mintNft', error);
+    throw new Error('Error minting NFT');
   }
 }

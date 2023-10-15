@@ -1,4 +1,4 @@
-import {PublicKey} from '@metaplex-foundation/umi';
+import { PublicKey } from '@metaplex-foundation/umi';
 
 export type CandyMachineParams = {
   itemsAvailable: number;
@@ -74,9 +74,26 @@ export type TicketMetadata = NftMetadata & {
   ];
 };
 
-export type TicketEventPair = {
-  ticketPublicKey: string;
-  eventPublicKey: string;
+export type TicketsAndRespectiveEvents = {
+  events: PublicKey[];
+  tickets: PublicKey[];
 };
 
-export type TicketEventPairs = TicketEventPair[];
+export type Event = {
+  title: string;
+
+  image: string;
+  cover: string;
+
+  timestamp: number;
+  link: string;
+
+  publicKey: PublicKey;
+};
+
+export type EventWithTicket = Event & {
+  ticket: {
+    publicKey: PublicKey;
+    bought: boolean;
+  };
+};

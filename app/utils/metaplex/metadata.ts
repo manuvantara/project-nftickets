@@ -1,27 +1,20 @@
 import { launchImageLibrary } from 'react-native-image-picker';
 import RNFetchBlob from 'rn-fetch-blob';
-
 import {
-  fetchDigitalAsset,
   fetchMetadataFromSeeds,
   updateV1,
 } from '@metaplex-foundation/mpl-token-metadata';
-import { NFT_STORAGE_API_KEY } from '@env';
-import {
-  CandyMachineParams,
-  EventMetadata,
-  NftMetadata,
-  TicketMetadata,
-} from '../types';
-import { PublicKey, Signer, Umi } from '@metaplex-foundation/umi';
+import Config from 'react-native-config';
+import { CandyMachineParams, NftMetadata } from '../types';
+import { PublicKey, Umi } from '@metaplex-foundation/umi';
 import { waitForTransaction } from '../helpers/wait-for-transaction';
+import { fetchMetadataByMint } from './nft-retrieval';
 
 export const PREFIX_URI = 'ipfs://';
 export const GATEWAY_HOST = 'https://nftstorage.link/ipfs/';
 
 export async function uploadImage(): Promise<string | undefined> {
   try {
-    console.log('Uploading image...');
     // Select an image from the user's device
     const photo = await launchImageLibrary({
       selectionLimit: 1,
@@ -52,21 +45,21 @@ export async function uploadImage(): Promise<string | undefined> {
     );
     return `${imageUpload.value.cid}`;
   } catch (error) {
-    console.error('Error uploading image:', error);
+    console.error('uploadImage', error);
+    throw new Error('Error uploading image');
   }
 }
 
 export async function uploadToIpfs(
   data: any,
   contentType: 'image/jpg' | 'application/json',
-): Promise<{ value: { cid: string } } | undefined> {
+): Promise<{ value: { cid: string } }> {
   try {
-    console.log('Uploading to ipfs...');
     const upload = await fetch('https://api.nft.storage/upload', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
-        Authorization: `Bearer ${NFT_STORAGE_API_KEY}`,
+        Authorization: `Bearer ${Config.NFT_STORAGE_API_KEY}`,
         'Content-Type': contentType,
       },
       body: data,
@@ -74,56 +67,33 @@ export async function uploadToIpfs(
 
     return await upload.json();
   } catch (error) {
-    console.error('Error uploading to IPFS:', error);
+    console.error('uploadToIpfs', error);
+    throw new Error('Error uploading to IPFS');
   }
 }
 
 export async function uploadMetadata(
   nftMetadata: NftMetadata,
-): Promise<string | undefined> {
+): Promise<string> {
   try {
-    console.log('Uploading metadata...');
     const metadataUpload = await uploadToIpfs(
       JSON.stringify(nftMetadata),
       'application/json',
     );
-    if (!metadataUpload) return;
 
-    console.log(
-      `The metadata was uploaded uploaded to ${GATEWAY_HOST}${metadataUpload.value.cid}`,
-    );
     return `${metadataUpload.value.cid}`;
   } catch (error) {
-    console.error('Error uploading metadata:', error);
-  }
-}
-
-export async function fetchNftMetadata(
-  umi: Umi,
-  mintPublicKey: PublicKey,
-): Promise<EventMetadata | TicketMetadata | undefined> {
-  try {
-    const uri = (await fetchDigitalAsset(umi, mintPublicKey)).metadata.uri;
-    const cid = uri.split('/').pop(); // Extract the last part of the uri i.e. cid
-
-    const response = await fetch(`${GATEWAY_HOST}${cid}`);
-    const metadata = await response.json();
-
-    return metadata;
-  } catch (error) {
-    console.error('Error fetching metadata:', error);
+    console.error('uploadMetadata', error);
+    throw new Error('Error uploading metadata');
   }
 }
 
 export async function updateTicketVisits(
   umi: Umi,
-  authority: Signer,
   nftMintPublicKey: PublicKey,
 ): Promise<void> {
   try {
-    console.log('Updating ticket`s metadata...');
-
-    const initialMetadata = await fetchNftMetadata(umi, nftMintPublicKey);
+    const initialMetadata = await fetchMetadataByMint(umi, nftMintPublicKey);
     if (!initialMetadata) return;
 
     const updatedMetadata = initialMetadata;
@@ -140,34 +110,27 @@ export async function updateTicketVisits(
 
     const { signature } = await updateV1(umi, {
       mint: nftMintPublicKey,
-      authority: authority,
+      authority: umi.payer,
       data: { ...nftMetadataAccount, uri: `${PREFIX_URI}${cid}` },
     }).sendAndConfirm(umi);
-    waitForTransaction(umi, signature);
-
-    console.log('Ticket`s metadata was successfully updated');
+    await waitForTransaction(umi, signature);
   } catch (error) {
-    console.error('Error updating ticket`s metadata:', error);
+    console.error('updateTicketVisits', error);
+    throw new Error('Error updating ticket`s metadata');
   }
 }
 
 export async function updateEventMetadata(
   umi: Umi,
-  authority: Signer,
   collectionMintPublicKey: PublicKey,
   candyMachinePublicKey: PublicKey,
   candyMachineParams: CandyMachineParams,
-): Promise<string | undefined> {
+): Promise<string> {
   try {
-    console.log('Updating event`s metadata...');
-
     const updatedMetadata = candyMachineParams.metadata;
-    updatedMetadata.attributes[0].value =
-      candyMachineParams.startDate.toString();
     updatedMetadata.attributes[1].value = candyMachinePublicKey;
 
     const cid = await uploadMetadata(updatedMetadata);
-    if (!cid) return;
 
     const collectionMetadataAccount = await fetchMetadataFromSeeds(umi, {
       mint: collectionMintPublicKey,
@@ -175,13 +138,14 @@ export async function updateEventMetadata(
 
     const { signature } = await updateV1(umi, {
       mint: collectionMintPublicKey,
-      authority: authority,
+      authority: umi.payer,
       data: { ...collectionMetadataAccount, uri: `${PREFIX_URI}${cid}` },
     }).sendAndConfirm(umi);
-    waitForTransaction(umi, signature);
+    await waitForTransaction(umi, signature);
 
-    console.log('Event`s metadata was successfully updated');
+    return cid;
   } catch (error) {
-    console.error('Error updating event`s metadata:', error);
+    console.error('updateEventMetadata', error);
+    throw new Error('Error updating event`s metadata');
   }
 }

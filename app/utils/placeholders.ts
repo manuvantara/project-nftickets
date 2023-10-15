@@ -4,13 +4,13 @@ import { dateTime, publicKey } from '@metaplex-foundation/umi';
 
 export const NFT: ConfigLine = {
   name: '',
-  uri: 'bafkreidgwakxiplpk2t4yf7b4zmn6pu7ygln3fmftmva7fcb6cm3plf6mq', // link to the uploaded metadata
+  uri: 'bafkreif5bapa3ih2co5r3gvchp5zb24uefvmn3aue5vd3x2bfa7ewtvymi', // only cid
 };
 
 export const NFT_METADATA: TicketMetadata = {
-  name: 'Atlass Weekend 2023 Ticket',
+  name: '#123123',
   description: '',
-  image: 'should be first uploaded to ipfs/aws',
+  image: 'ipfs://bafybeicolpbcv7e6w7qqd3sexnjyegbtatlddix5qmvtjoozsio3fuezhe',
   animation_url: '',
   external_url: 'https://atlasfestival.com/',
   attributes: [
@@ -40,7 +40,7 @@ export const NFT_METADATA: TicketMetadata = {
 export const COLLECTION_METADATA: EventMetadata = {
   name: 'Atlass Weekend 2023',
   description: '',
-  image: 'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_1280.jpg', // nftCollectionImageUri
+  image: 'ipfs://bafybeicolpbcv7e6w7qqd3sexnjyegbtatlddix5qmvtjoozsio3fuezhe', // nftCollectionImageUri
   animation_url: '',
   external_url: 'https://atlasfestival.com/', // event website
   attributes: [
@@ -56,7 +56,7 @@ export const COLLECTION_METADATA: EventMetadata = {
   properties: {
     files: [
       {
-        uri: 'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_1280.jpg', // nftCollectionBannerUri
+        uri: 'ipfs://bafybeicolpbcv7e6w7qqd3sexnjyegbtatlddix5qmvtjoozsio3fuezhe', // nftCollectionBannerUri
         type: 'image/jpg',
         cdn: false,
       },
@@ -70,7 +70,7 @@ export const CANDY_MACHINE_PARAMS: CandyMachineParams = {
 
   startDate: dateTime(new Date()),
   pricePerToken: 0.01,
-  treasury: publicKey('FSLGMiNAfKAszf6M3zyEVZaZx3mA5ZeQJYBkeAzfKEVm'),
+  treasury: publicKey('Ec4gukukmjCzbfkkioMHhnGWgPgcuMK7eEafTJ6XowbJ'),
 
   metadata: COLLECTION_METADATA,
 };
@@ -86,3 +86,31 @@ export const SOME_NFT_COLLECTION = publicKey(
 export const SOME_NFT = publicKey(
   'BWdspE5HaBCg4QKJ7Qw9xgf255UKz6ZRimsQcTXQn1nK',
 );
+
+export const EMPTY_EVENT_METADATA: EventMetadata = {
+  name: '',
+  description: '',
+  image: '',
+  animation_url: '',
+  external_url: '',
+  attributes: [
+    {
+      trait_type: 'start_time',
+      value: '',
+    },
+    {
+      trait_type: 'candy_machine',
+      value: '',
+    },
+  ],
+  properties: {
+    files: [
+      {
+        uri: '',
+        type: 'image/jpg',
+        cdn: false,
+      },
+    ],
+    category: 'banner',
+  },
+};

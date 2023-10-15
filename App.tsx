@@ -1,11 +1,10 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
 import { ROUTES } from './app/constants/routes';
-
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { RootStackParamList } from './app/types/navigation';
+import UmiProvider from './app/providers/umi-provider';
 import { QRScannerScreen, TicketScreen } from './app/components/screens';
 import {
   CreateEventNavigator,
@@ -16,6 +15,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App(): JSX.Element {
   return (
+    <UmiProvider>
     <SafeAreaProvider>
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -32,5 +32,6 @@ export default function App(): JSX.Element {
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
+    </UmiProvider>
   );
 }

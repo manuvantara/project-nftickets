@@ -1,60 +1,87 @@
 import {
+  CandyMachine,
   CandyMachineItem,
   fetchCandyMachine,
 } from '@metaplex-foundation/mpl-candy-machine';
-import { fetchAllDigitalAssetByOwner } from '@metaplex-foundation/mpl-token-metadata';
-import { TicketEventPairs, TicketMetadata } from '../types';
+import {
+  DigitalAsset,
+  fetchAllDigitalAsset,
+  fetchAllDigitalAssetByOwner,
+  fetchDigitalAsset,
+} from '@metaplex-foundation/mpl-token-metadata';
+import {
+  EventMetadata,
+  TicketMetadata,
+  TicketsAndRespectiveEvents,
+} from '../types';
 import { PublicKey, Umi, publicKey } from '@metaplex-foundation/umi';
-import { fetchNftMetadata } from './metadata';
+import { EMPTY_EVENT_METADATA } from '../placeholders';
+import { uriToPath } from '../helpers/uri-to-path';
 
 export async function fetchCandyMachineItems(
   umi: Umi,
   candyMachinePublicKey: PublicKey,
-): Promise<CandyMachineItem[] | undefined> {
+): Promise<CandyMachineItem[]> {
   try {
-    console.log('Fetching NFTs...');
-
     const candyMachine = await fetchCandyMachine(umi, candyMachinePublicKey);
 
-    console.log(candyMachine.items);
     return candyMachine.items;
   } catch (error) {
-    console.error('Error fetching NFTs:', error);
+    console.error('fetchCandyMachineItems', error);
+    throw new Error('Error fetching NFTs');
+  }
+}
+
+export async function fetchMetadataByMint(
+  umi: Umi,
+  mintPublicKey: PublicKey,
+): Promise<EventMetadata | TicketMetadata> {
+  try {
+    const uri = (await fetchDigitalAsset(umi, mintPublicKey)).metadata.uri;
+    const path = uriToPath(uri);
+
+    const response = await fetch(path);
+    const metadata = await response.json();
+
+    return metadata;
+  } catch (error) {
+    console.error('fetchMetadataByMint', error);
+    throw new Error('Error fetching NFT metadata');
   }
 }
 
 // Fetches NFTs from uri array in parallel
-export async function fetchNftsMetadata(
+export async function fetchMetadatasByUris(
   uris: string[],
-): Promise<TicketMetadata[] | undefined> {
+): Promise<EventMetadata[] | TicketMetadata[]> {
   try {
-    console.log('Fetching nft(s) metadata...');
+    if (!uris.length) throw new Error('No uris provided');
 
     const fetchPromises: Promise<any>[] = [];
-
     for (const uri of uris) {
-      const metadataPromise = (await fetch(uri)).json();
+      const path = uriToPath(uri);
+      const metadataPromise = fetch(path);
       fetchPromises.push(metadataPromise);
     }
 
-    const results: TicketMetadata[] = await Promise.all(fetchPromises);
-    console.log(results);
+    const responses = await Promise.all(fetchPromises);
+    const results = await Promise.allSettled(responses.map(r => r.json()));
 
-    return results;
+    return results.map(result =>
+      result.status === 'rejected' ? EMPTY_EVENT_METADATA : result.value,
+    );
   } catch (error) {
-    console.error('Error fetching NFT metadata:', error);
+    console.error('fetchMetadatasByUris', error);
+    throw new Error('Error fetching NFT metadata');
   }
 }
 
-export async function fetchTicketsByEvent(
+export async function fetchCandyMachineByEvent(
   umi: Umi,
   eventPublicKey: PublicKey,
-): Promise<String[] | undefined> {
+): Promise<CandyMachine> {
   try {
-    console.log('Fetching event tickets...');
-
-    const eventMetadata = await fetchNftMetadata(umi, eventPublicKey);
-    if (!eventMetadata) return;
+    const eventMetadata = await fetchMetadataByMint(umi, eventPublicKey);
 
     const candyMachineTrait = eventMetadata.attributes.find(
       trait => trait.trait_type === 'candy_machine',
@@ -64,44 +91,78 @@ export async function fetchTicketsByEvent(
     }
 
     const candyMachinePublicKey = publicKey(candyMachineTrait.value);
-    const candyMachine = await fetchCandyMachine(umi, candyMachinePublicKey);
+    return await fetchCandyMachine(umi, candyMachinePublicKey);
+  } catch (error) {
+    console.error('fetchCandyMachineByEvent', error);
+    throw new Error('Error fetching event candy machine');
+  }
+}
 
-    console.log(candyMachine.items);
+export async function fetchTicketsByEvent(
+  umi: Umi,
+  eventPublicKey: PublicKey,
+): Promise<string[]> {
+  try {
+    const candyMachine = await fetchCandyMachineByEvent(umi, eventPublicKey);
+
     return candyMachine.items.map(item => item.uri);
   } catch (error) {
-    console.error('Error getting tickets by event', error);
+    console.error('fetchTicketsByEvent', error);
+    throw new Error('Error fetching event tickets');
   }
 }
 
 export async function fetchTicketEventPairsByOwner(
   umi: Umi,
-  ownerPublicKey: PublicKey,
-): Promise<TicketEventPairs | undefined> {
+): Promise<TicketsAndRespectiveEvents> {
   try {
-    console.log('Fetching ticket-event pairs...');
+    const assets = await fetchAllDigitalAssetByOwner(umi, umi.payer.publicKey);
 
-    const assets = await fetchAllDigitalAssetByOwner(umi, ownerPublicKey);
-    const tickets = assets.filter(
-      asset => asset.metadata.collection.__option === 'Some',
-    );
+    const ticketsAndRespectiveEvents: TicketsAndRespectiveEvents = {
+      events: [],
+      tickets: [],
+    };
 
-    const ticketEventPairs: TicketEventPairs = [];
-
-    for (const ticket of tickets) {
+    for (const ticket of assets) {
       const collectionDetails = ticket.metadata.collection;
       if (collectionDetails.__option === 'None') continue;
 
-      const eventPublicKey = collectionDetails.value.key;
-
-      ticketEventPairs.push({
-        ticketPublicKey: publicKey(ticket.publicKey),
-        eventPublicKey: publicKey(eventPublicKey),
-      });
+      ticketsAndRespectiveEvents.events.push(collectionDetails.value.key);
+      ticketsAndRespectiveEvents.tickets.push(ticket.mint.publicKey);
     }
 
-    console.log(ticketEventPairs);
-    return ticketEventPairs;
+    return ticketsAndRespectiveEvents;
   } catch (error) {
-    console.error('Error getting ticket-event pairs', error);
+    console.error('fetchTicketEventPairsByOwner', error);
+    throw new Error('Error fetching ticket-event pairs');
+  }
+}
+
+export async function fetchEventsByOwner(umi: Umi): Promise<DigitalAsset[]> {
+  try {
+    const assets = await fetchAllDigitalAssetByOwner(umi, umi.payer.publicKey);
+    const eventAssets = assets.filter(
+      asset => asset.metadata.collection.__option === 'None',
+    );
+
+    return eventAssets;
+  } catch (error) {
+    console.error('fetchEventsByOwner', error);
+    throw new Error('Error fetching my events');
+  }
+}
+
+export async function fetchUrisByMintList(
+  umi: Umi,
+  mintList: PublicKey[],
+): Promise<string[]> {
+  try {
+    if (!mintList.length) throw new Error('Mint list is empty');
+
+    const assets = await fetchAllDigitalAsset(umi, mintList);
+    return assets.map(asset => asset.metadata.uri);
+  } catch (error) {
+    console.error('fetchUrisByMintList', error);
+    throw new Error('Error fetching uris by public keys');
   }
 }
