@@ -174,7 +174,7 @@ export default function TicketScreen({
           NFTicket
         </MontserratMedium>
         <View style={s.cardBodyQrCodeWrapper}>
-          <QRCode size={160} value={event.link} />
+          <QRCode size={160} value={`${event.ticket.publicKey} ${event.publicKey}`} />
         </View>
       </View>
     </LinearGradient>
