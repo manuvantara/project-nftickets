@@ -21,6 +21,11 @@ import Header from '../header';
 import { MontserratRegular } from '../text';
 import ShieldPlus from '../../images/ShieldPlus.svg';
 import { uploadImage } from '../../utils/metaplex/metadata';
+import { createCandyMachine } from '../../utils/metaplex/core';
+import useUmi from '../../hooks/use-umi';
+import { publicKey } from '@metaplex-foundation/umi';
+import { dateToTimestamp } from '../../utils/helpers/timestamp-to-date';
+import { CandyMachineParams } from '../../utils/types';
 
 enum Steps {
   FIRST,
@@ -44,6 +49,7 @@ const secondStepSchema = z.object({
 });
 
 export default function CreateEventScreen() {
+  const umi = useUmi();
   const [step, setStep] = React.useState<Steps>(Steps.FIRST);
   const { control, handleSubmit, formState, setValue, trigger, getValues } =
     useForm<z.infer<typeof firstStepSchema & typeof secondStepSchema>>({
@@ -56,15 +62,61 @@ export default function CreateEventScreen() {
   const [formValues, setFormValues] =
     React.useState<z.infer<typeof firstStepSchema & typeof secondStepSchema>>();
 
-  const testSubmit = data => {
-    const values = {
-      ...formValues,
-      ...data,
-    };
-    setFormValues(values);
+  async function onFormSubmit(data) {
+    try {
+      const values = {
+        ...formValues,
+        ...data,
+      };
+      setFormValues(values);
 
-    console.log(values);
-  };
+      const candyMachineParams: CandyMachineParams = {
+        itemsAvailable: Number(values.ticketsAmount),
+        startDate: BigInt(dateToTimestamp(values.salesStart)),
+        pricePerToken: Number(values.ticketPrice),
+        treasury: publicKey(values.treasuryAddress),
+        metadata: {
+          name: values.eventName,
+          description: '',
+          image: values.eventImage,
+          animation_url: '',
+          external_url: values.websiteLink ?? '',
+          attributes: [
+            {
+              trait_type: 'start_time',
+              value: dateToTimestamp(values.startTime).toString(),
+            },
+            {
+              trait_type: 'candy_machine',
+              value: '',
+            },
+          ],
+          properties: {
+            files: [
+              {
+                uri: values.eventBanner,
+                type: 'image/jpg',
+                cdn: false,
+              },
+            ],
+            category: 'banner',
+          },
+        },
+      };
+      const eventPublicKey = await createCandyMachine(umi, candyMachineParams);
+      await fetch('https://available-events-api.onrender.com/event', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          publicKey: eventPublicKey,
+        }),
+      });
+    } catch (error) {
+      console.error('onFormSubmit', error);
+    }
+  }
 
   const returnToPreviousStep = () => {
     setStep(Steps.FIRST);
@@ -487,7 +539,7 @@ export default function CreateEventScreen() {
               name="eventBanner"
             />
 
-            <Button style={s.button} onPress={handleSubmit(testSubmit)}>
+            <Button style={s.button} onPress={handleSubmit(onFormSubmit)}>
               Create event
             </Button>
           </View>
