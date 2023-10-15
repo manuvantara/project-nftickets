@@ -1,20 +1,20 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import TabHeader from './tab-header';
-import { ROUTES } from '../constants/routes';
+import TabHeader from '../tab-header';
+import { ROUTES } from '../../constants/routes';
 import {
   AvailableEventsScreen,
   MyTicketsScreen,
   MyEventsScreen,
-} from './screens';
-import TagIcon from '../images/Tag.svg';
-import TicketIcon from '../images/Ticket.svg';
-import ClipboardIcon from '../images/ClipboardAdd.svg';
-import { RootTabParamList } from '../types/navigation';
+} from '../screens';
+import TagIcon from '../../images/Tag.svg';
+import TicketIcon from '../../images/Ticket.svg';
+import ClipboardIcon from '../../images/ClipboardAdd.svg';
+import { RootTabParamList } from '../../types/navigation';
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
-export default function TabNavigation() {
+export default function BottomTabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={{

@@ -6,7 +6,6 @@ import QRCode from 'react-native-qrcode-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Shadow } from 'react-native-shadow-2';
 import { COLORS } from '../../constants/theme';
-import ArrowLeft from '../../images/AltArrowLeft.svg';
 import ArrowRightUp from '../../images/ArrowRightUp.svg';
 import { RootStackScreenProps } from '../../types/navigation';
 import Button from '../button';
@@ -20,6 +19,7 @@ import {
 import { timestampToDate } from '../../utils/helpers/timestamp-to-date';
 import { ExternalLink } from '../external-link';
 import { fetchCandyGuard } from '@metaplex-foundation/mpl-candy-machine';
+import Header from '../header';
 
 import { uriToPath } from '../../utils/helpers/uri-to-path';
 import {
@@ -32,6 +32,7 @@ import { mintNft } from '../../utils/metaplex/core';
 
 export default function TicketScreen({
   route,
+  navigation,
 }: RootStackScreenProps<'Ticket'>) {
   const event = route.params;
   const insets = useSafeAreaInsets();
@@ -162,11 +163,7 @@ export default function TicketScreen({
 
   return (
     <ScrollView style={s.container}>
-      <View style={[s.header, , { paddingTop: insets.top + 8 }]}>
-        <Shadow distance={4} style={s.backButton}>
-          <ArrowLeft width={24} height={24} />
-        </Shadow>
-      </View>
+      <Header />
       <View style={s.content}>
         <Shadow distance={4} style={s.topCard}>
           <FastImage
