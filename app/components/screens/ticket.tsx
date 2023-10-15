@@ -6,12 +6,12 @@ import QRCode from 'react-native-qrcode-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Shadow } from 'react-native-shadow-2';
 import { COLORS } from '../../constants/theme';
-import ArrowLeft from '../../images/AltArrowLeft.svg';
 import ArrowRightUp from '../../images/ArrowRightUp.svg';
 import { RootStackScreenProps } from '../../types/navigation';
 import Button from '../button';
 import FlipCard, { FlipSide } from '../flip-card';
 import { MontserratMedium, MontserratSemiBold } from '../text';
+import Header from '../header';
 
 const TOP_CARD_DATA = {
   image: 'https://picsum.photos/200/300',
@@ -86,13 +86,7 @@ export default function TicketScreen({
 
   return (
     <ScrollView style={s.container}>
-      <View style={[s.header, , { paddingTop: insets.top + 8 }]}>
-        <Pressable onPress={() => navigation.goBack()}>
-          <Shadow distance={4} style={s.backButton}>
-            <ArrowLeft width={24} height={24} />
-          </Shadow>
-        </Pressable>
-      </View>
+      <Header />
       <View style={s.content}>
         <Shadow distance={4} style={s.topCard}>
           <FastImage
