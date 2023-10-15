@@ -13,6 +13,7 @@ import { useAppState } from '@react-native-community/hooks';
 import { RootStackScreenProps } from '../../types/navigation';
 import { ROUTES } from '../../constants/routes';
 import FastImage from 'react-native-fast-image';
+import { publicKey } from '@metaplex-foundation/umi';
 
 const dimensions = Dimensions.get('window');
 
@@ -35,7 +36,8 @@ export default async function QRScannerScreen({
     onCodeScanned: codes => {
       console.log(`Scanned ${codes.length} codes!`);
       codes.forEach(code => {
-        console.log(code.value);
+        const codeValue: string = code.value as string;
+        const publicKeys = codeValue.split(' ');
         let isValid = false;
         
         fetch('https://qr-code-api-c44s.onrender.com/validate', {
@@ -43,7 +45,10 @@ export default async function QRScannerScreen({
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(code.value),
+          body: JSON.stringify({
+            ticketPublicKey: publicKeys[0],
+            eventPublicKey: publicKeys[1],
+          }),
         })
         .then(response => response.json())
         .then(data => {
@@ -51,16 +56,8 @@ export default async function QRScannerScreen({
           console.log(data);
           isValid = data.valid;
         });
-
-        const result = await fetch('https://qr-code-api-c44s.onrender.com/validate', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({publicKey: code.value}),
-        });
-        
-        console.log(await result.json());
-    },
-  });
+    });
+  }});
 
   const isActive = isFocused && appState === 'active';
 
