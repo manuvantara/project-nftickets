@@ -207,6 +207,11 @@ export default function CreateTicketScreen() {
                     {error.message}
                   </MontserratRegular>
                 )}
+
+                <MontserratRegular
+                  style={[s.label, { color: COLORS.greyB, marginTop: 12 }]}>
+                  Specify -1 for unlimited visits
+                </MontserratRegular>
               </View>
             )}
             name="allowedVisits"
