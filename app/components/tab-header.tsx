@@ -6,6 +6,8 @@ import { Shadow } from 'react-native-shadow-2';
 import { ROUTES } from '../constants/routes';
 import ScannerIcon from '../images/Scanner.svg';
 import AddCircleIcon from '../images/AddCircle.svg';
+import { COLORS } from '../constants/theme';
+import { MontserratSemiBold } from './text';
 
 export default function TabHeader({ route, navigation }: BottomTabHeaderProps) {
   const insets = useSafeAreaInsets();
@@ -31,7 +33,7 @@ export default function TabHeader({ route, navigation }: BottomTabHeaderProps) {
           <ScannerIcon color="black" width={24} height={24} />
         </Pressable>
       </Shadow>
-      <Text style={s.title}>{route.name}</Text>
+      <MontserratSemiBold style={s.title}>{route.name}</MontserratSemiBold>
       <Shadow
         containerStyle={{
           opacity: ROUTES.TAB.MY_EVENTS === route.name ? 1 : 0,
@@ -74,11 +76,8 @@ const s = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontFamily: 'Montserrat-SemiBold',
     fontSize: 20,
-    letterSpacing: -0.17,
     textAlign: 'center',
-    // TODO: Change to the theme color when it'll be available
-    color: '#181C1F',
+    color: COLORS.black,
   },
 });
