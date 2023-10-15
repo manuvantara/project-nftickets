@@ -55,6 +55,7 @@ export default function TicketScreen({
     destination: PublicKey;
     price: string;
     candyMachinePublicKey: PublicKey;
+    salesStartTimestamp: number;
   }>();
 
   useEffect(() => {
@@ -83,7 +84,11 @@ export default function TicketScreen({
             umi,
             candyMachine.mintAuthority,
           );
-          if (candyGuard.guards.solPayment.__option !== 'Some')
+          console.log(candyGuard.guards);
+          if (
+            candyGuard.guards.solPayment.__option !== 'Some' ||
+            candyGuard.guards.startDate.__option !== 'Some'
+          )
             throw new Error('Failed to retrieve guard details.');
 
           setPurchaseDetails({
@@ -93,6 +98,8 @@ export default function TicketScreen({
               3,
             ),
             candyMachinePublicKey: candyMachine.publicKey,
+            salesStartTimestamp:
+              Number(candyGuard.guards.startDate.value.date) * 1000,
           });
         }
       } catch (error) {
@@ -140,7 +147,9 @@ export default function TicketScreen({
           <MontserratSemiBold style={s.cardBodyTitle}>
             {event.title}
           </MontserratSemiBold>
-          <MontserratMedium style={s.cardBodyType}>VIP</MontserratMedium>
+          <MontserratMedium style={s.cardBodyType}>
+            {ticket?.type}
+          </MontserratMedium>
         </View>
       </FastImage>
     </LinearGradient>
@@ -202,7 +211,8 @@ export default function TicketScreen({
           <Button
             style={s.buyButton}
             disabled={
-              !purchaseDetails?.candyMachinePublicKey || !purchaseDetails?.price
+              !purchaseDetails ||
+              Date.now() < purchaseDetails.salesStartTimestamp
             }
             onPress={() =>
               mintNft(
