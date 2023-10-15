@@ -44,6 +44,7 @@ export default function TicketScreen({
   const [cardSide, setCardSide] = useState<FlipSide>(FlipSide.BACK);
 
   const umi = useUmi();
+  const [allTicketsBought, setAllTicketsBought] = useState(false);
   const [ticket, setTicket] = useState<{
     id: string;
     image: string;
@@ -91,6 +92,9 @@ export default function TicketScreen({
           )
             throw new Error('Failed to retrieve guard details.');
 
+          setAllTicketsBought(
+            candyMachine.itemsLoaded === Number(candyMachine.itemsRedeemed),
+          );
           setPurchaseDetails({
             destination: candyGuard.guards.solPayment.value.destination,
             price: displayAmount(
@@ -222,7 +226,7 @@ export default function TicketScreen({
             style={s.card}
           />
         )}
-        {!event.ticket.bought && (
+        {!event.ticket.bought && !allTicketsBought && (
           <Button
             style={s.buyButton}
             disabled={
@@ -238,6 +242,9 @@ export default function TicketScreen({
             }>
             Buy for {purchaseDetails?.price ?? displayAmount(sol(0), 3)}
           </Button>
+        )}
+        {allTicketsBought && (
+          <MontserratMedium style={s.hint}>All tickets bought</MontserratMedium>
         )}
       </View>
     </ScrollView>
