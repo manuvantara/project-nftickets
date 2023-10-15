@@ -10,6 +10,7 @@ export type RootStackParamList = {
     ticketId: string;
   };
   [ROUTES.QR_SCANNER]: undefined;
+  [ROUTES.CREATE_EVENT.INDEX]: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
@@ -24,5 +25,18 @@ export type RootTabParamList = {
 export type RootTabScreenProps<Screen extends keyof RootTabParamList> =
   CompositeScreenProps<
     BottomTabScreenProps<RootTabParamList, Screen>,
+    StackScreenProps<RootStackParamList>
+  >;
+
+export type CreateEventParamList = {
+  [ROUTES.CREATE_EVENT.CREATE]: undefined;
+  [ROUTES.CREATE_EVENT.CREATE_TICKET]: {
+    ticketId: string;
+  };
+};
+
+export type CreateEventScreenProps<Screen extends keyof CreateEventParamList> =
+  CompositeScreenProps<
+    NativeStackScreenProps<CreateEventParamList, Screen>,
     StackScreenProps<RootStackParamList>
   >;
