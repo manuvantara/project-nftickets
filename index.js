@@ -9,7 +9,6 @@ import 'react-native-get-random-values';
 global.Buffer = require('buffer').Buffer;
 global.TextEncoder = require('text-encoding').TextEncoder;
 
-
 import App from './App';
 import { name as appName } from './app.json';
 
