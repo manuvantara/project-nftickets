@@ -15,8 +15,9 @@ import { ROUTES } from '../../constants/routes';
 import FastImage from 'react-native-fast-image';
 
 const dimensions = Dimensions.get('window');
+let codeLock = false;
 
-export default function QRScannerScreen({
+export default async function QRScannerScreen({
   navigation,
 }: RootStackScreenProps<'QR Scanner'>) {
   const isFocused = useIsFocused();
@@ -34,9 +35,34 @@ export default function QRScannerScreen({
     codeTypes: ['qr', 'ean-13'],
     onCodeScanned: codes => {
       console.log(`Scanned ${codes.length} codes!`);
-      codes.forEach(code => code.value && console.log(code.value));
-    },
-  });
+      codes.forEach(code => {
+        if (codeLock) return;
+        codeLock = true;
+        
+        const codeValue: string = code.value as string;
+        const publicKeys = codeValue.split(' ');
+        let isValid = false;
+
+        setTimeout(() => codeLock = false, 2000);
+        
+        fetch('https://qr-code-api-c44s.onrender.com/validate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ticketPublicKey: publicKeys[0],
+            eventPublicKey: publicKeys[1],
+          }),
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log('isValid');
+          console.log(data);
+          isValid = data.valid;
+        });
+    });
+  }});
 
   const isActive = isFocused && appState === 'active';
 

@@ -1,13 +1,12 @@
 import React, { useCallback } from 'react';
-import { Linking, TouchableOpacity } from 'react-native';
+import { Linking, TouchableOpacity, TouchableOpacityProps } from 'react-native';
 
-export function ExternalLink({
-  url,
-  children,
-}: {
+type Props = TouchableOpacityProps & {
   url: string;
   children: React.ReactNode;
-}) {
+};
+
+export function ExternalLink({ url, children, ...props }: Props) {
   const onPress = useCallback(async () => {
     // const supported = await Linking.canOpenURL(url);
 
@@ -18,5 +17,9 @@ export function ExternalLink({
     await Linking.openURL(url);
   }, [url]);
 
-  return <TouchableOpacity onPress={onPress}>{children}</TouchableOpacity>;
+  return (
+    <TouchableOpacity onPress={onPress} {...props}>
+      {children}
+    </TouchableOpacity>
+  );
 }

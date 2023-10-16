@@ -21,6 +21,19 @@ import Header from '../header';
 import { MontserratRegular } from '../text';
 import { uploadImage } from '../../utils/metaplex/metadata';
 import ShieldPlus from '../../images/ShieldPlus.svg';
+import { PublicKey } from '@metaplex-foundation/umi';
+import {
+  CreateEventParamList,
+  CreateEventScreenProps,
+} from '../../types/navigation';
+import { insertNfts } from '../../utils/metaplex/core';
+import useUmi from '../../hooks/use-umi';
+import { TicketMetadata } from '../../utils/types';
+import {
+  fetchCandyMachineByEvent,
+  fetchMetadataByMint,
+} from '../../utils/metaplex/nft-retrieval';
+import { dateToTimestamp } from '../../utils/helpers/timestamp-to-date';
 
 const TicketTypes = z.enum(['Standard', 'VIP', 'Student']);
 
@@ -31,7 +44,12 @@ const formSchema = z.object({
   copies: z.string(),
 });
 
-export default function CreateTicketScreen() {
+export default function CreateTicketScreen(
+  props: CreateEventScreenProps<'Create Ticket'>,
+) {
+  const umi = useUmi();
+  const { eventPublicKey } = props.route.params;
+
   const { control, handleSubmit, setValue, getValues } = useForm<
     z.infer<typeof formSchema>
   >({
@@ -39,9 +57,51 @@ export default function CreateTicketScreen() {
     mode: 'onChange',
   });
 
-  const onSubmit = data => {
-    console.log(data);
-  };
+  async function onSubmit(data) {
+    try {
+      console.log(data);
+      const eventMetadata = await fetchMetadataByMint(umi, eventPublicKey);
+      const candyMachine = await fetchCandyMachineByEvent(umi, eventPublicKey);
+
+      const nft: TicketMetadata = {
+        name: candyMachine.itemsLoaded.toString(),
+        description: '',
+        image: data.ticketImage,
+        animation_url: '',
+        external_url: eventMetadata.external_url,
+        attributes: [
+          {
+            trait_type: 'expiry_time',
+            value: dateToTimestamp(data.expiryDate).toString(),
+          },
+          {
+            trait_type: 'ticket_type',
+            value: data.ticketType,
+          },
+          {
+            trait_type: 'allowed_visits',
+            value: data.allowedVisits,
+          },
+          {
+            trait_type: 'visits',
+            value: '0',
+          },
+        ],
+        properties: {
+          files: [],
+          category: '',
+        },
+      };
+
+      await insertNfts(
+        umi,
+        candyMachine.publicKey,
+        Array(data.copies).fill(nft),
+      );
+    } catch (error) {
+      console.error('onSubmit', error);
+    }
+  }
 
   const showDatepicker = (
     currentMode: 'date' | 'time',

@@ -81,7 +81,7 @@ export async function createCandyMachine(
       candyMachineParams,
     );
 
-    return candyMachine.publicKey;
+    return collectionMintPublicKey;
   } catch (error) {
     console.error('createCandyMachine', error);
     throw new Error('Error creating candy machine');
