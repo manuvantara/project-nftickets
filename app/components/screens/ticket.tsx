@@ -174,7 +174,10 @@ export default function TicketScreen({
           NFTicket
         </MontserratMedium>
         <View style={s.cardBodyQrCodeWrapper}>
-          <QRCode size={160} value={`${event.ticket.publicKey} ${event.publicKey}`} />
+          <QRCode
+            size={160}
+            value={`${event.ticket.publicKey} ${event.publicKey}`}
+          />
         </View>
       </View>
     </LinearGradient>
@@ -197,7 +200,7 @@ export default function TicketScreen({
               {timestampToDate(event.timestamp)}
             </MontserratMedium>
           </View>
-          <ExternalLink url={event.link}>
+          <ExternalLink url={event.link} style={s.topCardArrow}>
             <ArrowRightUp width={32} height={32} />
           </ExternalLink>
         </Shadow>

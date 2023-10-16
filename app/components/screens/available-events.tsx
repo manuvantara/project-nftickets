@@ -5,12 +5,15 @@ import { RootTabScreenProps } from '../../types/navigation';
 import { ROUTES } from '../../constants/routes';
 import useUmi from '../../hooks/use-umi';
 import {
+  fetchCandyMachineByEvent,
   fetchMetadatasByUris,
   fetchUrisByMintList,
 } from '../../utils/metaplex/nft-retrieval';
 import { publicKey } from '@metaplex-foundation/umi';
 import { isEvent } from '../../utils/helpers/type-guards';
 import { Event } from '../../utils/types';
+import { insertNfts } from '../../utils/metaplex/core';
+import { NFT } from '../../utils/placeholders';
 
 const MOCK_EVENT = {
   cover: 'https://picsum.photos/200',
@@ -34,6 +37,7 @@ export default function AvailableEventsScreen({
           'https://available-events-api.onrender.com/events',
         );
         const eventsList = (await response.json()).events.eventPublicKeys;
+
         const eventUris = await fetchUrisByMintList(
           umi,
           eventsList.map(event => publicKey(event)),
