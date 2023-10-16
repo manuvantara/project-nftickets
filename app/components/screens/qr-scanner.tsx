@@ -13,9 +13,9 @@ import { useAppState } from '@react-native-community/hooks';
 import { RootStackScreenProps } from '../../types/navigation';
 import { ROUTES } from '../../constants/routes';
 import FastImage from 'react-native-fast-image';
-import { publicKey } from '@metaplex-foundation/umi';
 
 const dimensions = Dimensions.get('window');
+let codeLock = false;
 
 export default async function QRScannerScreen({
   navigation,
@@ -36,9 +36,14 @@ export default async function QRScannerScreen({
     onCodeScanned: codes => {
       console.log(`Scanned ${codes.length} codes!`);
       codes.forEach(code => {
+        if (codeLock) return;
+        codeLock = true;
+        
         const codeValue: string = code.value as string;
         const publicKeys = codeValue.split(' ');
         let isValid = false;
+
+        setTimeout(() => codeLock = false, 2000);
         
         fetch('https://qr-code-api-c44s.onrender.com/validate', {
           method: 'POST',
