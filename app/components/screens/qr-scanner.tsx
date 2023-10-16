@@ -16,11 +16,11 @@ import FastImage from 'react-native-fast-image';
 import { useState } from 'react';
 
 const dimensions = Dimensions.get('window');
-let [codeLock, setCodeLock] = useState(false);
 
 export default function QRScannerScreen({
   navigation,
 }: RootStackScreenProps<'QR Scanner'>) {
+  let [codeLock, setCodeLock] = useState(false);
   const isFocused = useIsFocused();
   const appState = useAppState();
   const { hasPermission, requestPermission } = useCameraPermission();
