@@ -4,6 +4,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { StackScreenProps } from '@react-navigation/stack';
 import type { ROUTES } from '../constants/routes';
 import { type EventWithTicket } from '../utils/types';
+import { PublicKey } from '@metaplex-foundation/umi';
 
 export type RootStackParamList = {
   [ROUTES.TAB.INDEX]: undefined;
@@ -30,7 +31,7 @@ export type RootTabScreenProps<Screen extends keyof RootTabParamList> =
 export type CreateEventParamList = {
   [ROUTES.CREATE_EVENT.CREATE]: undefined;
   [ROUTES.CREATE_EVENT.CREATE_TICKET]: {
-    ticketId: string;
+    eventPublicKey: PublicKey;
   };
 };
 
