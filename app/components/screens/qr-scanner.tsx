@@ -13,9 +13,10 @@ import { useAppState } from '@react-native-community/hooks';
 import { RootStackScreenProps } from '../../types/navigation';
 import { ROUTES } from '../../constants/routes';
 import FastImage from 'react-native-fast-image';
+import { useState } from 'react';
 
 const dimensions = Dimensions.get('window');
-let codeLock = false;
+let [codeLock, setCodeLock] = useState(false);
 
 export default function QRScannerScreen({
   navigation,
@@ -38,7 +39,7 @@ export default function QRScannerScreen({
       codes.forEach(code => {
         if (!code.value) return;
         if (codeLock) return;
-        codeLock = true;
+        setCodeLock(true);
         
         const codeValue: string = code.value as string;
         const publicKeys = codeValue.split(' ');
@@ -59,11 +60,11 @@ export default function QRScannerScreen({
           console.log('isValid');
           console.log(data);
           isValid = data.valid;
-          codeLock = false;
+          setCodeLock(false);
         })
         .catch(error => {
           console.error('Error:', error);
-          codeLock = false;
+          setCodeLock(false);
         });
     });
   }});
