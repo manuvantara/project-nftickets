@@ -40,7 +40,6 @@ const TicketTypes = z.enum(['Standard', 'VIP', 'Student']);
 const formSchema = z.object({
   ticketImage: z.string(),
   expiryDate: z.string(),
-  allowedVisits: z.string(),
   ticketType: TicketTypes,
   copies: z.string(),
 });
@@ -241,40 +240,6 @@ export default function CreateTicketScreen(
               </View>
             )}
             name="expiryDate"
-          />
-
-          <Controller
-            control={control}
-            render={({
-              field: { onChange, onBlur, value },
-              fieldState: { error },
-            }) => (
-              <View style={s.formControl}>
-                <MontserratRegular style={s.label}>
-                  Allowed visits
-                </MontserratRegular>
-
-                <TextInput
-                  style={[s.textInput, error && s.error]}
-                  placeholderTextColor={COLORS.greyB}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                />
-
-                {error && (
-                  <MontserratRegular style={s.errorText}>
-                    {error.message}
-                  </MontserratRegular>
-                )}
-
-                <MontserratRegular
-                  style={[s.label, { color: COLORS.greyB, marginTop: 12 }]}>
-                  Specify -1 for unlimited visits
-                </MontserratRegular>
-              </View>
-            )}
-            name="allowedVisits"
           />
 
           <Controller

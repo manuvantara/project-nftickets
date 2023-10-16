@@ -6,6 +6,7 @@ export const ROUTES = {
     MY_TICKETS: 'My Tickets',
   },
   TICKET: 'Ticket',
+  EVENT: 'Event',
   QR_SCANNER: 'QR Scanner',
   CREATE_EVENT: {
     INDEX: 'Create Event Index',

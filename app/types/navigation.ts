@@ -9,6 +9,7 @@ import { PublicKey } from '@metaplex-foundation/umi';
 export type RootStackParamList = {
   [ROUTES.TAB.INDEX]: undefined;
   [ROUTES.TICKET]: EventWithTicket;
+  [ROUTES.EVENT]: undefined;
   [ROUTES.QR_SCANNER]: undefined;
   [ROUTES.CREATE_EVENT.INDEX]: undefined;
 };
