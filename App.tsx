@@ -5,7 +5,11 @@ import { ROUTES } from './app/constants/routes';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { RootStackParamList } from './app/types/navigation';
 import UmiProvider from './app/providers/umi-provider';
-import { QRScannerScreen, TicketScreen } from './app/components/screens';
+import {
+  EventScreen,
+  QRScannerScreen,
+  TicketScreen,
+} from './app/components/screens';
 import {
   CreateEventNavigator,
   BottomTabNavigator,
@@ -24,6 +28,7 @@ export default function App(): JSX.Element {
               component={BottomTabNavigator}
             />
             <Stack.Screen name={ROUTES.TICKET} component={TicketScreen} />
+            <Stack.Screen name={ROUTES.EVENT} component={EventScreen} />
             <Stack.Screen
               name={ROUTES.QR_SCANNER}
               component={QRScannerScreen}
