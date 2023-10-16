@@ -55,8 +55,6 @@ export async function fetchMetadatasByUris(
   uris: string[],
 ): Promise<EventMetadata[] | TicketMetadata[]> {
   try {
-    if (!uris.length) throw new Error('No uris provided');
-
     const fetchPromises: Promise<any>[] = [];
     for (const uri of uris) {
       const path = uriToPath(uri);
@@ -157,8 +155,6 @@ export async function fetchUrisByMintList(
   mintList: PublicKey[],
 ): Promise<string[]> {
   try {
-    if (!mintList.length) throw new Error('Mint list is empty');
-
     const assets = await fetchAllDigitalAsset(umi, mintList);
     return assets.map(asset => asset.metadata.uri);
   } catch (error) {
