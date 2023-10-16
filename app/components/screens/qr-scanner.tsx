@@ -17,7 +17,7 @@ import FastImage from 'react-native-fast-image';
 const dimensions = Dimensions.get('window');
 let codeLock = false;
 
-export default async function QRScannerScreen({
+export default function QRScannerScreen({
   navigation,
 }: RootStackScreenProps<'QR Scanner'>) {
   const isFocused = useIsFocused();
@@ -33,17 +33,16 @@ export default async function QRScannerScreen({
       height: 240,
     },
     codeTypes: ['qr', 'ean-13'],
-    onCodeScanned: codes => {
+    onCodeScanned: async codes => {
       console.log(`Scanned ${codes.length} codes!`);
       codes.forEach(code => {
+        if (!code.value) return;
         if (codeLock) return;
         codeLock = true;
         
         const codeValue: string = code.value as string;
         const publicKeys = codeValue.split(' ');
         let isValid = false;
-
-        setTimeout(() => codeLock = false, 2000);
         
         fetch('https://qr-code-api-c44s.onrender.com/validate', {
           method: 'POST',
@@ -60,6 +59,11 @@ export default async function QRScannerScreen({
           console.log('isValid');
           console.log(data);
           isValid = data.valid;
+          codeLock = false;
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          codeLock = false;
         });
     });
   }});
